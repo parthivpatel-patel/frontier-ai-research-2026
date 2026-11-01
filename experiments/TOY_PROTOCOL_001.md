@@ -16,7 +16,7 @@ Initial x=0.9, v=0.2, available impulses a in {-0.2, 0, +0.2}, and objective min
 
 ## Sampling and expected checks
 
-Three disjoint proposal regimes (256 independent seeded draws each, seed 20261101):
+Three proposal regimes (256 independent seeded draws each, seed 20261101):
 - ordinary: x in [0.25,0.65], v in [-0.08,0.08], a in [-0.05,0.05]. No impacts are possible.
 - uniform: x in [0.1,0.9], v in [-0.2,0.2], a in [-0.1,0.1]. Some impacts are possible.
 - boundary: x in [0.88,0.98], v in [0.14,0.28], a in [0,0.08]. All draws impact the right wall.
