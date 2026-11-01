@@ -74,3 +74,28 @@ def sample_risk_decision(cases: Iterable[OracleCase], maximum_error_rate: Fracti
     if lower > maximum_error_rate:
         return "fails_for_every_supplied_interpretation"
     return "depends_on_unresolved_interpretation"
+
+
+def joint_error_bounds(accepted_cases: Iterable[OracleCase],
+                       total_instructions: int) -> dict[str, object]:
+    """Finite-sample accepted-error bounds with ALL instructions in denominator.
+
+    Matches the *definition* of joint risk in selective prediction, not its
+    population-level conformal guarantee. Rejected instructions count zero.
+    """
+    accepted = tuple(accepted_cases)
+    if (isinstance(total_instructions, bool)
+            or not isinstance(total_instructions, int)
+            or total_instructions < 1
+            or len(accepted) > total_instructions):
+        raise ValueError("total_instructions must be >=1 and >= accepted count")
+    error_sets = tuple(case.possible_errors() for case in accepted)
+    return {
+        "total_instructions": total_instructions,
+        "accepted_cases": len(accepted),
+        "lower_joint_error_rate": Fraction(sum(s == frozenset({1}) for s in error_sets),
+                                           total_instructions),
+        "upper_joint_error_rate": Fraction(sum(1 in s for s in error_sets),
+                                           total_instructions),
+        "guarantee_scope": "Finite sample and supplied semantic candidates only",
+    }
