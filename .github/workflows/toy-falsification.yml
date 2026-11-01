@@ -7,9 +7,11 @@ on:
       - "src/toy_falsification.py"
       - "src/scope_audit.py"
       - "src/exact_domain_audit.py"
+      - "src/semantic_oracle_bounds.py"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
       - "tests/test_exact_domain_audit.py"
+      - "tests/test_semantic_oracle_bounds.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
