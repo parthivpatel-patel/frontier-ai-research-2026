@@ -3,7 +3,7 @@ import unittest
 from fractions import Fraction
 
 from src.exact_domain_audit import Domain, Interval, Q
-from src.semantic_oracle_bounds import OracleCase, sample_error_bounds, sample_risk_decision
+from src.semantic_oracle_bounds import OracleCase, sample_error_bounds, sample_risk_decision, joint_error_bounds
 
 
 def domain():
@@ -44,6 +44,29 @@ class OracleAmbiguityTests(unittest.TestCase):
                          'passes_for_every_supplied_interpretation')
         self.assertEqual(sample_risk_decision(cases, Fraction(1, 4)),
                          'fails_for_every_supplied_interpretation')
+
+    def test_joint_risk_uses_all_instructions(self):
+        cases = (
+            OracleCase(domain(), Q('0.8'), (Q('0.8'),)),
+            OracleCase(domain(), Q('0.8'), (Q('0.8'), Q('0.9'))),
+            OracleCase(domain(), Q('1'), (Q('0.8'), Q('0.9'))),
+        )
+        result = joint_error_bounds(cases, 6)
+        self.assertEqual(result['lower_joint_error_rate'], Fraction(1, 6))
+        self.assertEqual(result['upper_joint_error_rate'], Fraction(1, 3))
+
+    def test_all_abstain_joint_risk_is_zero(self):
+        result = joint_error_bounds([], 4)
+        self.assertEqual(result['lower_joint_error_rate'], Fraction(0))
+        self.assertEqual(result['upper_joint_error_rate'], Fraction(0))
+
+    def test_joint_risk_invalid_total(self):
+        case = OracleCase(domain(), Q('0.8'), (Q('0.8'),))
+        for bad in (0, -1, True):
+            with self.assertRaises(ValueError):
+                joint_error_bounds((case,), bad)
+        with self.assertRaises(ValueError):
+            joint_error_bounds((case, case), 1)
 
     def test_reject_empty_reference(self):
         with self.assertRaises(ValueError):
