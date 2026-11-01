@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - "src/toy_falsification.py"
+      - "src/scope_audit.py"
       - "tests/test_toy_falsification.py"
+      - "tests/test_scope_audit.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
