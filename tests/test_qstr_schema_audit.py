@@ -51,6 +51,19 @@ class QSTRSchemaAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "exceeded bound"):
             unpack_records(blob, git_blob_sha(blob), len(blob))
 
+    def test_repeat_counts_and_nested_metadata_without_raw_values(self):
+        rows = [
+            {"id": "a", "repeat": 0, "response": {"content": "secret"}},
+            {"id": "a", "repeat": 1, "response": {"content": "other"}},
+            {"id": "b", "repeat": 0, "request": {"model": "test"}},
+        ]
+        result = schema_summary(rows)
+        self.assertEqual(result["unique_identifier_values"], 2)
+        self.assertEqual(result["identifier_values_with_repeats"], 1)
+        self.assertEqual(result["repeat_field_distribution"], {"0": 2, "1": 1})
+        self.assertEqual(result["nested_fields_present"]["response"], {"content": 2})
+        self.assertNotIn("secret", json.dumps(result))
+
     def test_schema_only_no_accuracy_metric(self):
         result = schema_summary([{"id": 1, "answer": "x"}, {"id": 2}])
         self.assertEqual(result["rows"], 2)
