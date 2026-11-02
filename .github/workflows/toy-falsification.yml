@@ -9,11 +9,15 @@ on:
       - "src/exact_domain_audit.py"
       - "src/semantic_oracle_bounds.py"
       - "src/oracle_stress.py"
+      - "src/damped_domain_audit.py"
+      - "src/physical_probe_suite.py"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
       - "tests/test_exact_domain_audit.py"
       - "tests/test_semantic_oracle_bounds.py"
       - "tests/test_oracle_stress.py"
+      - "tests/test_damped_domain_audit.py"
+      - "tests/test_physical_probe_suite.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -33,3 +37,5 @@ jobs:
         run: python3 -m src.toy_falsification --count 256 --seed 20261101
       - name: Print semantic-oracle stress diagnostics
         run: python3 -m src.oracle_stress
+      - name: Print two-family semantic-oracle fixtures
+        run: python3 -m src.physical_probe_suite
