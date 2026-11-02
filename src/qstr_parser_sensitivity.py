@@ -19,7 +19,7 @@ COMPACT_INEQUALITY = re.compile(
     r"(?<![A-Za-z0-9_])([A-Za-z][A-Za-z0-9_]*)!=([A-Za-z][A-Za-z0-9_]*)(?![A-Za-z0-9_])"
 )
 UPSTREAM_EDGE_CLEANUP = re.compile(
-    r"^[^a-zA-Z0-9<>=]+|[^a-zA-Z0-9<>=\\)]+$"
+    r"^[^a-zA-Z0-9<>=]+|[^a-zA-Z0-9<>=\)]+$"
 )
 
 
@@ -36,7 +36,7 @@ def clean_first_marker(text: str) -> str:
 
 def compact_inequality_fix(cleaned: str) -> str:
     """Only insert spaces around an isolated compact ASCII identifier != pair."""
-    return COMPACT_INEQUALITY.sub(r"\\1 != \\2", cleaned)
+    return COMPACT_INEQUALITY.sub(r"\1 != \2", cleaned)
 
 
 def paired_sensitivity(rows, questions, expected_repeats) -> dict:
