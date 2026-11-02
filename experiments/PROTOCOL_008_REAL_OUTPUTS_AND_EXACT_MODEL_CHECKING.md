@@ -16,7 +16,7 @@ A `SearchBudgetExceeded` exception is an **incomplete result**, never a proof of
 
 The four mutations belong to **one original human requirement**; no confidence interval or source-level generalization is permitted.
 
-### B. Real model outputs (discovered, NOT imported)
+### B. Upstream-attributed model-output records (discovered, NOT imported)
 
 Primary candidate: English et al., VLTL-Bench, https://arxiv.org/abs/2507.00877 and https://github.com/Dubascudes/VLTL-Bench . Inspected `main` commit `383baea8210b93fe9fa7d14edd4757e5b3464e82` on 2026-11-02.
 
@@ -30,7 +30,7 @@ Exact inspected file paths:
 
 **Licensing stop gate:** upstream GitHub metadata has `license: null` and its tracked tree contains no LICENSE; linked Kaggle page did not expose verifiable terms. No dataset or model-response contents may be copied into this repo or republished until license or explicit authorization is established. If rights remain unclear, use another explicitly licensed source or ask upstream authors for clarification; never infer a license from public visibility.
 
-**Task-comparability stop gate:** Claude grounding outputs cannot be treated as direct NL-to-LTL predictions. GPT-5 and Llama direct outputs are stored as prior model responses, **not fresh model calls**. Do not claim we ran or paid for either model.
+**Task-comparability stop gate:** Claude grounding outputs cannot be treated as direct NL-to-LTL predictions. GPT-5 and Llama direct outputs are stored as prior model-response records with unverified generation provenance, **not fresh model calls**. Do not claim we ran or paid for either model.
 
 **Temporal-semantics stop gate:** provided `good_trace`/`bad_trace` arrays are finite; do not silently interpret them as infinite traces or assume a last-state loop. Specify LTLf or a justified infinite extension, and check any declared physical transition relation before a physical witness claim.
 
