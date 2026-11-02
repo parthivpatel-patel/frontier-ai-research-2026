@@ -72,3 +72,6 @@ jobs:
 
       - name: Audit pinned VLTL-Bench prediction strings (aggregate-only)
         run: python3 -m src.vltl_prediction_audit
+
+      - name: Audit grounded proposition aliases in pinned lifted VLTL predictions
+        run: python3 -m src.vltl_alias_audit
