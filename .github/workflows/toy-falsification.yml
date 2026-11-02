@@ -12,6 +12,8 @@ on:
       - "src/damped_domain_audit.py"
       - "src/physical_probe_suite.py"
       - "src/intervention_identifiability.py"
+      - "src/temporal_label_audit.py"
+      - "data/external/**"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
       - "tests/test_exact_domain_audit.py"
@@ -20,6 +22,7 @@ on:
       - "tests/test_damped_domain_audit.py"
       - "tests/test_physical_probe_suite.py"
       - "tests/test_intervention_identifiability.py"
+      - "tests/test_temporal_label_audit.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -43,3 +46,5 @@ jobs:
         run: python3 -m src.physical_probe_suite
       - name: Print exact intervention distinguishability baseline
         run: python3 -m src.intervention_identifiability
+      - name: Audit pinned public NL-to-LTL mutation dataset
+        run: python3 -m src.temporal_label_audit
