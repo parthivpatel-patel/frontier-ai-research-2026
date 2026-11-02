@@ -14,6 +14,7 @@ on:
       - "src/intervention_identifiability.py"
       - "src/temporal_label_audit.py"
       - "src/learned_offset_baseline.py"
+      - "src/independent_source_audit.py"
       - "data/external/**"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
@@ -25,6 +26,7 @@ on:
       - "tests/test_intervention_identifiability.py"
       - "tests/test_temporal_label_audit.py"
       - "tests/test_learned_offset_baseline.py"
+      - "tests/test_independent_source_audit.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -52,3 +54,5 @@ jobs:
         run: python3 -m src.temporal_label_audit
       - name: Run tiny learned NLP baseline and print its limitations
         run: python3 -m src.learned_offset_baseline
+      - name: Audit three independent source requirements and exact lasso witnesses
+        run: python3 -m src.independent_source_audit
