@@ -37,7 +37,7 @@ MAX_ROWS = 100_000
 
 
 def git_blob_sha(blob: bytes) -> str:
-    return hashlib.sha1(b"blob " + str(len(blob)).encode() + b"\\0" + blob).hexdigest()
+    return hashlib.sha1(b"blob " + str(len(blob)).encode() + b"\0" + blob).hexdigest()
 
 
 def unpack_records(blob: bytes, expected_sha: str, expected_size: int) -> list[dict]:
