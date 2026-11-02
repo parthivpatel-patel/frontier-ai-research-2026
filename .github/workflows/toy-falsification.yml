@@ -15,6 +15,7 @@ on:
       - "src/temporal_label_audit.py"
       - "src/learned_offset_baseline.py"
       - "src/independent_source_audit.py"
+      - "src/admissible_lasso_audit.py"
       - "data/external/**"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
@@ -27,6 +28,7 @@ on:
       - "tests/test_temporal_label_audit.py"
       - "tests/test_learned_offset_baseline.py"
       - "tests/test_independent_source_audit.py"
+      - "tests/test_admissible_lasso_audit.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -56,3 +58,5 @@ jobs:
         run: python3 -m src.learned_offset_baseline
       - name: Audit three independent source requirements and exact lasso witnesses
         run: python3 -m src.independent_source_audit
+      - name: Filter logical counterexamples through two toy actuator models
+        run: python3 -m src.admissible_lasso_audit
