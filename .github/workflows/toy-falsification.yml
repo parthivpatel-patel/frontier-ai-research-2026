@@ -4,33 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/toy_falsification.py"
-      - "src/scope_audit.py"
-      - "src/exact_domain_audit.py"
-      - "src/semantic_oracle_bounds.py"
-      - "src/oracle_stress.py"
-      - "src/damped_domain_audit.py"
-      - "src/physical_probe_suite.py"
-      - "src/intervention_identifiability.py"
-      - "src/temporal_label_audit.py"
-      - "src/learned_offset_baseline.py"
-      - "src/independent_source_audit.py"
-      - "src/admissible_lasso_audit.py"
-      - "src/exhaustive_offset_audit.py"
+      - "src/**"
+      - "tests/**"
       - "data/external/**"
-      - "tests/test_toy_falsification.py"
-      - "tests/test_scope_audit.py"
-      - "tests/test_exact_domain_audit.py"
-      - "tests/test_semantic_oracle_bounds.py"
-      - "tests/test_oracle_stress.py"
-      - "tests/test_damped_domain_audit.py"
-      - "tests/test_physical_probe_suite.py"
-      - "tests/test_intervention_identifiability.py"
-      - "tests/test_temporal_label_audit.py"
-      - "tests/test_learned_offset_baseline.py"
-      - "tests/test_independent_source_audit.py"
-      - "tests/test_admissible_lasso_audit.py"
-      - "tests/test_exhaustive_offset_audit.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -64,3 +40,5 @@ jobs:
         run: python3 -m src.admissible_lasso_audit
       - name: Complete finite-state check for bounded-next toy requirements
         run: python3 -m src.exhaustive_offset_audit
+      - name: Audit nested dynamics and masking of counterexamples
+        run: python3 -m src.dynamics_masking_audit
