@@ -1,0 +1,28 @@
+name: Pinned QSTRBench parser sensitivity
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/qstr_schema_audit.py"
+      - "src/qstr_scoring_replication.py"
+      - "src/qstr_parser_sensitivity.py"
+      - "tests/test_qstr_parser_sensitivity.py"
+      - ".github/workflows/qstr-parser-sensitivity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parser-sensitivity:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out research code
+        uses: actions/checkout@v4
+      - name: Validate parser and paired scoring fixtures without network
+        run: python3 -m unittest discover -s tests -p 'test_qstr_parser_sensitivity.py' -v
+      - name: Audit pinned QSTRBench recorded outputs (aggregates only)
+        run: python3 -m src.qstr_parser_sensitivity
