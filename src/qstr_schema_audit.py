@@ -84,15 +84,29 @@ def schema_summary(rows) -> dict:
     count = 0
     fields = Counter()
     types: dict[str, Counter] = {}
+    identifiers = Counter()
+    repeats = Counter()
+    nested_fields: dict[str, Counter] = {}
     for row in rows:
         count += 1
         for key, value in row.items():
             fields[key] += 1
             types.setdefault(key, Counter())[type(value).__name__] += 1
+            if key in ("request", "response") and isinstance(value, dict):
+                nested_fields.setdefault(key, Counter()).update(value.keys())
+        identifier = row.get("id", row.get("ID"))
+        if identifier is not None:
+            identifiers[str(identifier)] += 1
+        if "repeat" in row:
+            repeats[str(row["repeat"])] += 1
     return {
         "rows": count,
         "fields_present": dict(sorted(fields.items())),
         "field_types": {k: dict(sorted(v.items())) for k, v in sorted(types.items())},
+        "nested_fields_present": {k: dict(sorted(v.items())) for k, v in sorted(nested_fields.items())},
+        "unique_identifier_values": len(identifiers),
+        "identifier_values_with_repeats": sum(n > 1 for n in identifiers.values()),
+        "repeat_field_distribution": dict(sorted(repeats.items())),
         "interpretation": "Schema only; no model accuracy, semantics, or authorship established",
     }
 
