@@ -128,7 +128,7 @@ def fixed_roster_risk_audit(
         "predeclared_method_count": len(method_ids),
         "per_method_alpha": adjusted,
         "methods": output,
-        "real_model_results": False,
+        "data_provenance": "caller_supplied_unverified",
         "limitations": (
             "Classical iid conditional-on-acceptance binomial inference only; "
             "fixed thresholds and eligible sources; no optional stopping. "
