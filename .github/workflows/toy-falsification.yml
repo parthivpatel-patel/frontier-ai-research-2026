@@ -13,6 +13,7 @@ on:
       - "src/physical_probe_suite.py"
       - "src/intervention_identifiability.py"
       - "src/temporal_label_audit.py"
+      - "src/learned_offset_baseline.py"
       - "data/external/**"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
@@ -23,6 +24,7 @@ on:
       - "tests/test_physical_probe_suite.py"
       - "tests/test_intervention_identifiability.py"
       - "tests/test_temporal_label_audit.py"
+      - "tests/test_learned_offset_baseline.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -48,3 +50,5 @@ jobs:
         run: python3 -m src.intervention_identifiability
       - name: Audit pinned public NL-to-LTL mutation dataset
         run: python3 -m src.temporal_label_audit
+      - name: Run tiny learned NLP baseline and print its limitations
+        run: python3 -m src.learned_offset_baseline
