@@ -60,3 +60,6 @@ jobs:
 
       - name: Print synthetic nonzero-failure and multiplicity audit
         run: python3 -m src.selective_risk_gate
+
+      - name: Print synthetic paired unsafe-acceptance audit
+        run: python3 -m src.paired_unsafe_acceptance
