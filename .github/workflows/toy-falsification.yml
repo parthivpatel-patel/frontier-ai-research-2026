@@ -8,10 +8,12 @@ on:
       - "src/scope_audit.py"
       - "src/exact_domain_audit.py"
       - "src/semantic_oracle_bounds.py"
+      - "src/oracle_stress.py"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
       - "tests/test_exact_domain_audit.py"
       - "tests/test_semantic_oracle_bounds.py"
+      - "tests/test_oracle_stress.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -29,3 +31,5 @@ jobs:
         run: python3 -m unittest discover -s tests -v
       - name: Print synthetic sanity-check JSON to job log
         run: python3 -m src.toy_falsification --count 256 --seed 20261101
+      - name: Print semantic-oracle stress diagnostics
+        run: python3 -m src.oracle_stress
