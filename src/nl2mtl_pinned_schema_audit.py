@@ -36,7 +36,7 @@ def manifest() -> dict[str, str]:
 def verify_blob(data: bytes, expected_sha: str) -> dict:
     if len(data) > MAX_BYTES:
         raise ValueError("external file exceeds the pinned size limit")
-    actual = hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + b"\\0" + data).hexdigest()
+    actual = hashlib.sha1(b"blob " + str(len(data)).encode("ascii") + bytes([0]) + data).hexdigest()
     if actual != expected_sha:
         raise ValueError("upstream blob SHA mismatch")
     decoded = json.loads(data.decode("utf-8"))
