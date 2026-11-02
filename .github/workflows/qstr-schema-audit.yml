@@ -1,0 +1,25 @@
+name: Pinned QSTRBench schema audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/qstr_schema_audit.py"
+      - "tests/test_qstr_schema_audit.py"
+      - ".github/workflows/qstr-schema-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  external-schema-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out research source
+        uses: actions/checkout@v4
+      - name: Test schema auditor without external network
+        run: python3 -m unittest discover -s tests -p 'test_qstr_schema_audit.py' -v
+      - name: Inspect pinned QSTRBench questions and two model output schemas
+        run: python3 -m src.qstr_schema_audit
