@@ -111,6 +111,16 @@ def schema_summary(rows) -> dict:
     }
 
 
+def identifier_values(rows) -> set[str]:
+    """Identifier set only; no question or response content retained."""
+    ids = set()
+    for row in rows:
+        value = row.get("id", row.get("ID"))
+        if value is not None:
+            ids.add(str(value))
+    return ids
+
+
 def audit() -> dict:
     result = {
         "upstream": f"https://github.com/{UPSTREAM}/tree/{COMMIT}",
@@ -119,18 +129,30 @@ def audit() -> dict:
         "task": "QSTR, not NL-to-LTL translation",
         "files": {},
     }
+    ids_by_file = {}
     for name, (path, sha, size) in FILES.items():
         url = f"https://raw.githubusercontent.com/{UPSTREAM}/{COMMIT}/{path}"
         request = Request(url, headers={"User-Agent": "frontier-ai-research-read-only-schema-audit"})
         with urlopen(request, timeout=20) as response:
             blob = response.read(MAX_COMPRESSED + 1)
         rows = iter_records(blob, sha, size)
+        ids_by_file[name] = identifier_values(iter_records(blob, sha, size))
         result["files"][name] = {
             "source_path": path,
             "git_blob_sha1": sha,
             "compressed_bytes": size,
             **schema_summary(rows),
         }
+    questions = ids_by_file["questions"]
+    result["identifier_alignment"] = {
+        name: {
+            "question_ids_matched_by_string": len(questions & ids_by_file[name]),
+            "question_ids_not_matched": len(questions - ids_by_file[name]),
+            "model_ids_not_matched": len(ids_by_file[name] - questions),
+            "caution": "Matching IDs alone does not validate response correctness or row provenance",
+        }
+        for name in ("openai_gpt5", "claude_sonnet4")
+    }
     return result
 
 
