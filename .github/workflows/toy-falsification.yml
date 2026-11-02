@@ -57,3 +57,6 @@ jobs:
 
       - name: Print hypothetical independent-source precision bounds
         run: python3 -m src.source_precision_gate
+
+      - name: Print synthetic nonzero-failure and multiplicity audit
+        run: python3 -m src.selective_risk_gate
