@@ -63,3 +63,6 @@ jobs:
 
       - name: Print synthetic paired unsafe-acceptance audit
         run: python3 -m src.paired_unsafe_acceptance
+
+      - name: Enforce balanced source and trial exposure on synthetic predictions
+        run: python3 -m src.balanced_exposure_gate
