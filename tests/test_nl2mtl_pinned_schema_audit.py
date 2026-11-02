@@ -79,6 +79,19 @@ class PinnedAuditTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "SHA mismatch"):
             verify_blob(data + b" ", sha)
 
+    def test_integer_and_string_identifiers_are_supported_and_counted(self):
+        records = synthetic_records()
+        key = next(iter(records))
+        records[key]["MTL_expressions"][0]["id"] = 7
+        records[key]["dependency_sequence"] = [
+            {"preceding_id": "7", "following_id": 7}
+        ]
+        result = audit(records)
+        self.assertEqual(result["expression_id_json_types"]["int"], 1)
+        self.assertEqual(result["dependency_endpoint_json_types"]["int"], 1)
+        self.assertEqual(result["dependency_endpoint_json_types"]["str"], 1)
+        self.assertEqual(result["totals"]["unresolved_local_dependency_endpoints"], 0)
+
     def test_malformed_formula_rejected(self):
         records = synthetic_records()
         key = next(iter(records))
