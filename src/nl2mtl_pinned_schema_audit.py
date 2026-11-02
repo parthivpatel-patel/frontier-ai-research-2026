@@ -58,6 +58,14 @@ def fetch_pinned() -> dict[str, dict]:
     return result
 
 
+def normalize_id(value: object) -> str:
+    # Upstream output IDs vary between JSON strings and integers. Do not
+    # silently treat booleans or floating-point IDs as legitimate identifiers.
+    if isinstance(value, bool) or not isinstance(value, (str, int)):
+        raise ValueError("invalid identifier type")
+    return str(value)
+
+
 def nonempty(value: object) -> bool:
     if isinstance(value, str):
         return bool(value.strip())
@@ -73,6 +81,8 @@ def audit(records: dict[str, dict]) -> dict:
     totals = Counter()
     ambiguity_types = Counter()
     assumption_types = Counter()
+    expression_id_types = Counter()
+    dependency_id_types = Counter()
     for path in manifest():
         record = records[path]
         if not isinstance(record, dict):
@@ -94,9 +104,10 @@ def audit(records: dict[str, dict]) -> dict:
             eid = expression.get("id")
             formula = expression.get("MTL_expression")
             props = expression.get("propositions")
-            if not isinstance(eid, str) or not isinstance(formula, str) or not isinstance(props, list):
+            if not isinstance(formula, str) or not isinstance(props, list):
                 raise ValueError("malformed expression fields")
-            ids.append(eid)
+            ids.append(normalize_id(eid))
+            expression_id_types[type(eid).__name__] += 1
             totals["empty_formulas"] += int(not formula.strip())
             totals["expressions_with_propositions"] += int(bool(props))
             totals["proposition_records"] += len(props)
@@ -116,9 +127,9 @@ def audit(records: dict[str, dict]) -> dict:
                 raise ValueError("malformed dependency")
             for field in ("preceding_id", "following_id"):
                 ref = edge.get(field)
-                if not isinstance(ref, str):
-                    raise ValueError("malformed dependency reference")
-                totals["unresolved_local_dependency_endpoints"] += int(ref not in ids)
+                normalized_ref = normalize_id(ref)
+                dependency_id_types[type(ref).__name__] += 1
+                totals["unresolved_local_dependency_endpoints"] += int(normalized_ref not in ids)
     return {
         "audit": "pinned_external_schema_only",
         "upstream_commit": UPSTREAM_COMMIT,
@@ -136,6 +147,8 @@ def audit(records: dict[str, dict]) -> dict:
         "totals": dict(sorted(totals.items())),
         "ambiguity_field_json_types": dict(sorted(ambiguity_types.items())),
         "assumption_field_json_types": dict(sorted(assumption_types.items())),
+        "expression_id_json_types": dict(sorted(expression_id_types.items())),
+        "dependency_endpoint_json_types": dict(sorted(dependency_id_types.items())),
         "limitations": (
             "Four source documents, repeated outputs, no independent intent labels; "
             "no cross-run formula alignment or model correctness inference."
