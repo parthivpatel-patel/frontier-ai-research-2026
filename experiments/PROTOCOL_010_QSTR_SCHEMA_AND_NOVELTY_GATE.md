@@ -17,7 +17,7 @@ A new external benchmark, Cohn and Blackwell (2026), *QSTRBench*, publishes mode
 - Dataset's academic paper citation is marked TBD upstream; cite repository, authors, commit and license accurately. No assertion that its manuscript is peer reviewed.
 - The audit uses **only** the small compressed main-question file and recorded-answer files attributed upstream to `openai-gpt-5` and `claude-sonnet-4-20250514`. Their model identities and generation procedures have not been independently authenticated.
 - Compressed source sizes and Git blob SHA-1 values are pinned in `src/qstr_schema_audit.py`. All external bytes are fetched by the GitHub-hosted cloud runner, decompressed with Python's standard library under strict size limits, checked against Git object hashes, and **not copied into our repository or CI artifacts**.
-- The script reports field names, types, and row counts only, not prompts, answers, per-model scores, or user text. This is a schema audit, not a model benchmark.
+- The script reports field names, types, row counts, unique identifier counts, repeat-field distributions and nested field names only, not prompts, answers, per-model scores, or user text. This is a schema audit, not a model benchmark.
 
 ## Go/no-go decision gates
 
@@ -35,7 +35,8 @@ A new external benchmark, Cohn and Blackwell (2026), *QSTRBench*, publishes mode
 - Kupferman and Vardi (2003), *Vacuity Detection in Temporal Model Checking*, https://doi.org/10.1007/s100090100062
 - English et al. (2025), *VLTL-Bench*, https://arxiv.org/abs/2507.00877
 - ConformalNL2LTL: https://github.com/kantaroslab/ConformalNL2LTL
-- Cohn and Blackwell (2026), *QSTRBench*, https://github.com/RobBlackwell/QSTRBench
+- Cohn and Blackwell (2026), *QSTRBench*, https://arxiv.org/abs/2605.18380 and https://github.com/RobBlackwell/QSTRBench
+- Li, Hogg and Cohn (2024), *Reframing Spatial Reasoning Evaluation in Language Models*, https://arxiv.org/abs/2405.15064 (already includes logic-based checking of multiple plausible spatial solutions).
 
 These prior works preclude novelty claims based merely on semantic ambiguity, trace selection, physical constraints, vacuity, or benchmarking qualitative spatial reasoning. A future contribution must demonstrate a **specific incremental capability** with appropriate matched baselines.
 
