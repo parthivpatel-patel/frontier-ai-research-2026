@@ -66,3 +66,6 @@ jobs:
 
       - name: Enforce balanced source and trial exposure on synthetic predictions
         run: python3 -m src.balanced_exposure_gate
+
+      - name: Audit pinned SecDev26 NL2FutureLTL source metadata without redistribution
+        run: python3 -m src.secdev26_source_audit
