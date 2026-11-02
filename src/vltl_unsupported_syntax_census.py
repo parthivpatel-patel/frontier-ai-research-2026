@@ -102,7 +102,7 @@ def audit_unsupported(data: bytes) -> dict:
                 failures[_failure_class(exc)] += 1
         _lexical_counts(pred, operators, classes)
         _lexical_counts(reference, operators, classes)
-    if nonmatches != base["nonmatching_token_strings"]:
+    if nonmatches != (base["metadata_alias_only_nonmatches"] +\n                      base["remaining_unresolved_nonmatches"]):
         raise AssertionError("nonmatch partition changed")
     if supported + sum(groups.values()) != nonmatches:
         raise AssertionError("unsupported partition incomplete")
