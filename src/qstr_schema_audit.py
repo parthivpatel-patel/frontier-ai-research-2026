@@ -32,7 +32,8 @@ FILES = {
     ),
 }
 MAX_COMPRESSED = 1_000_000
-MAX_DECOMPRESSED = 25_000_000
+MAX_DECOMPRESSED = 256_000_000
+MAX_LINE = 1_000_000
 MAX_ROWS = 100_000
 
 
@@ -40,42 +41,56 @@ def git_blob_sha(blob: bytes) -> str:
     return hashlib.sha1(b"blob " + str(len(blob)).encode() + b"\0" + blob).hexdigest()
 
 
-def unpack_records(blob: bytes, expected_sha: str, expected_size: int) -> list[dict]:
+def iter_records(blob: bytes, expected_sha: str, expected_size: int):
+    """Stream bounded JSONL objects without retaining external model responses."""
     if len(blob) != expected_size or len(blob) > MAX_COMPRESSED:
         raise ValueError("Compressed input size mismatch or exceeded bound")
     if git_blob_sha(blob) != expected_sha:
         raise ValueError("Upstream Git blob SHA mismatch")
+    count = 0
+    total = 0
     try:
         with lzma.LZMAFile(io.BytesIO(blob)) as stream:
-            decoded = stream.read(MAX_DECOMPRESSED + 1)
+            while True:
+                line = stream.readline(MAX_LINE + 1)
+                if not line:
+                    break
+                total += len(line)
+                if total > MAX_DECOMPRESSED:
+                    raise ValueError("Decompressed input exceeded bound")
+                if len(line) > MAX_LINE:
+                    raise ValueError("JSONL line exceeded bound")
+                if not line.strip():
+                    continue
+                if count >= MAX_ROWS:
+                    raise ValueError("Too many records")
+                row = json.loads(line)
+                if not isinstance(row, dict):
+                    raise ValueError("Expected JSON objects, not scalar/array rows")
+                count += 1
+                yield row
     except lzma.LZMAError as exc:
         raise ValueError("Invalid xz data") from exc
-    if len(decoded) > MAX_DECOMPRESSED:
-        raise ValueError("Decompressed input exceeded bound")
-    records = []
-    for line in decoded.splitlines():
-        if not line.strip():
-            continue
-        if len(records) >= MAX_ROWS:
-            raise ValueError("Too many records")
-        row = json.loads(line)
-        if not isinstance(row, dict):
-            raise ValueError("Expected JSON objects, not scalar/array rows")
-        records.append(row)
-    if not records:
+    if not count:
         raise ValueError("No records found")
-    return records
 
 
-def schema_summary(rows: list[dict]) -> dict:
+def unpack_records(blob: bytes, expected_sha: str, expected_size: int) -> list[dict]:
+    """Test helper only; cloud audit uses the streaming iterator."""
+    return list(iter_records(blob, expected_sha, expected_size))
+
+
+def schema_summary(rows) -> dict:
+    count = 0
     fields = Counter()
     types: dict[str, Counter] = {}
     for row in rows:
+        count += 1
         for key, value in row.items():
             fields[key] += 1
             types.setdefault(key, Counter())[type(value).__name__] += 1
     return {
-        "rows": len(rows),
+        "rows": count,
         "fields_present": dict(sorted(fields.items())),
         "field_types": {k: dict(sorted(v.items())) for k, v in sorted(types.items())},
         "interpretation": "Schema only; no model accuracy, semantics, or authorship established",
@@ -95,7 +110,7 @@ def audit() -> dict:
         request = Request(url, headers={"User-Agent": "frontier-ai-research-read-only-schema-audit"})
         with urlopen(request, timeout=20) as response:
             blob = response.read(MAX_COMPRESSED + 1)
-        rows = unpack_records(blob, sha, size)
+        rows = iter_records(blob, sha, size)
         result["files"][name] = {
             "source_path": path,
             "git_blob_sha1": sha,
