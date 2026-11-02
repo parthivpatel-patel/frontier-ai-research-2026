@@ -69,3 +69,6 @@ jobs:
 
       - name: Audit pinned SecDev26 NL2FutureLTL source metadata without redistribution
         run: python3 -m src.secdev26_source_audit
+
+      - name: Audit pinned VLTL-Bench prediction strings (aggregate-only)
+        run: python3 -m src.vltl_prediction_audit
