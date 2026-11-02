@@ -23,7 +23,7 @@ class QSTRSchemaAuditTests(unittest.TestCase):
         import hashlib
         self.assertEqual(
             git_blob_sha(b"abc"),
-            hashlib.sha1(b"blob 3\\0abc").hexdigest(),
+            hashlib.sha1(b"blob 3\0abc").hexdigest(),
         )
 
     def test_roundtrip_jsonl(self):
