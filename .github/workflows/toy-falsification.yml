@@ -54,3 +54,6 @@ jobs:
 
       - name: Enforce source-disjoint split gate on synthetic source IDs
         run: python3 -m src.source_disjoint_gate
+
+      - name: Print hypothetical independent-source precision bounds
+        run: python3 -m src.source_precision_gate
