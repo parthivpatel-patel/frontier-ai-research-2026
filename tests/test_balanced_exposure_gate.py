@@ -151,8 +151,9 @@ class BalancedExposureTests(unittest.TestCase):
 
     def test_swap_methods_changes_difference_sign(self):
         rows = fixture()
-        rows[0] = {**rows[0], "incorrect": False}
+        rows[1] = {**rows[1], "incorrect": False}
         x = audit(rows)
+        self.assertNotEqual(x["source_level_paired_audit"]["difference_unsafe_acceptance_A_minus_B"], 0)
         y = audit([{**r, "method_id": "B" if r["method_id"] == "A" else "A"}
                    for r in rows])
         self.assertEqual(
