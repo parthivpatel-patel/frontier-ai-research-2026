@@ -6,6 +6,7 @@ import unittest
 from src.qstr_schema_audit import (
     MAX_COMPRESSED,
     git_blob_sha,
+    identifier_values,
     schema_summary,
     unpack_records,
 )
@@ -63,6 +64,12 @@ class QSTRSchemaAuditTests(unittest.TestCase):
         self.assertEqual(result["repeat_field_distribution"], {"0": 2, "1": 1})
         self.assertEqual(result["nested_fields_present"]["response"], {"content": 2})
         self.assertNotIn("secret", json.dumps(result))
+
+    def test_identifier_normalization_for_join_audit(self):
+        self.assertEqual(
+            identifier_values([{"ID": 1}, {"id": "1"}, {"id": "2"}]),
+            {"1", "2"},
+        )
 
     def test_schema_only_no_accuracy_metric(self):
         result = schema_summary([{"id": 1, "answer": "x"}, {"id": 2}])
