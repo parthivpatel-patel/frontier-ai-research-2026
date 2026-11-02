@@ -11,6 +11,7 @@ on:
       - "src/oracle_stress.py"
       - "src/damped_domain_audit.py"
       - "src/physical_probe_suite.py"
+      - "src/intervention_identifiability.py"
       - "tests/test_toy_falsification.py"
       - "tests/test_scope_audit.py"
       - "tests/test_exact_domain_audit.py"
@@ -18,6 +19,7 @@ on:
       - "tests/test_oracle_stress.py"
       - "tests/test_damped_domain_audit.py"
       - "tests/test_physical_probe_suite.py"
+      - "tests/test_intervention_identifiability.py"
       - ".github/workflows/toy-falsification.yml"
   workflow_dispatch:
 
@@ -39,3 +41,5 @@ jobs:
         run: python3 -m src.oracle_stress
       - name: Print two-family semantic-oracle fixtures
         run: python3 -m src.physical_probe_suite
+      - name: Print exact intervention distinguishability baseline
+        run: python3 -m src.intervention_identifiability
