@@ -45,3 +45,6 @@ jobs:
 
       - name: Audit exact disagreement across three nested toy dynamics
         run: python3 -m src.domain_uncertainty_audit
+
+      - name: Audit pinned external NL2MTL JSON structure without redistribution
+        run: python3 -m src.nl2mtl_pinned_schema_audit
