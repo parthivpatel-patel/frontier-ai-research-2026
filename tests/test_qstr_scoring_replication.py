@@ -42,7 +42,9 @@ class QSTRScoringReplicationTests(unittest.TestCase):
     def test_relation_extraction(self):
         self.assertEqual(extract_relation("A == B"), "=")
         self.assertEqual(extract_relation("A DC B"), "DC")
-        self.assertEqual(extract_relation("A!=B"), "!=")
+        # Upstream regex greedily parses compact A!=B as "="; preserve this.
+        self.assertEqual(extract_relation("A!=B"), "=")
+        self.assertEqual(extract_relation("A != B"), "!=")
 
     def test_repeated_questions_not_independent(self):
         questions = question_index([
