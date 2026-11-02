@@ -78,3 +78,6 @@ jobs:
 
       - name: Audit physical-assumption sensitivity with bounded infinite lassos
         run: python3 -m src.vltl_assumption_sensitivity_audit
+
+      - name: Census unsupported temporal-logic syntax without external text
+        run: python3 -m src.vltl_unsupported_syntax_census
