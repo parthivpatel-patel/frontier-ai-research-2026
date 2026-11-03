@@ -18,6 +18,33 @@ jobs:
           python-version: '3.11'
       - name: Execute bounded experiment and export original SVG and JSON
         run: python3 -m src.render_constructed_ltl
+      - name: Validate native figure against machine-readable experiment and hashes
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+          root = Path("artifacts/constructed_ltl")
+          result = json.loads((root / "result.json").read_text())
+          manifest = json.loads((root / "manifest.json").read_text())
+          assert result["data_kind"] == "constructed_fixture_not_external_AI"
+          assert result["unconstrained"]["status"] == "witness"
+          assert result["assumed_equal"]["status"] == "no_witness_within_bound"
+          assert result["example"]["G_prop_0"] is True
+          assert result["example"]["G_prop_1"] is False
+          assert manifest["commit"] == os.environ["GITHUB_SHA"]
+          for name in ("result.json", "witness.svg"):
+              assert hashlib.sha256((root / name).read_bytes()).hexdigest() == manifest["files"][name]
+          svg = ET.parse(root / "witness.svg").getroot()
+          assert svg.tag.endswith("svg")
+          labels = " ".join("".join(el.itertext()) for el in svg.iter() if el.tag.endswith("text"))
+          assert "counterexample found" in labels
+          assert "no witness within 3 states" in labels
+          assert "Constructed example only" in labels
+          print("Native figure, results, and SHA-256 manifest validated")
+          PY
       - name: Publish verifiable research artifacts
         uses: actions/upload-artifact@v4
         with:
