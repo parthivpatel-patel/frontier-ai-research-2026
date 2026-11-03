@@ -1,0 +1,26 @@
+name: Native constructed LTL research figure
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/render_constructed_ltl.py'
+      - '.github/workflows/native-constructed-ltl.yml'
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Execute bounded experiment and export original SVG and JSON
+        run: python3 -m src.render_constructed_ltl
+      - name: Publish verifiable research artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: constructed-ltl-protocol-028
+          path: artifacts/constructed_ltl/
+          if-no-files-found: error
