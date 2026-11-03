@@ -81,3 +81,6 @@ jobs:
 
       - name: Census unsupported temporal-logic syntax without external text
         run: python3 -m src.vltl_unsupported_syntax_census
+
+      - name: Classify frozen candidate LTL operators without exposing external text
+        run: python3 -m src.vltl_operator_vocabulary
