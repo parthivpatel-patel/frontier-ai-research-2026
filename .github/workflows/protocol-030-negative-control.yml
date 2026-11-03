@@ -1,0 +1,17 @@
+name: Protocol 030 false identity negative control
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'experiments/run_protocol_030_identity_negative_control.py'
+      - '.github/workflows/protocol-030-negative-control.yml'
+permissions:
+  contents: read
+jobs:
+  negative-control:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify incorrect physical identity assumption
+        run: python -m experiments.run_protocol_030_identity_negative_control
