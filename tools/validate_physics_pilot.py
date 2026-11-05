@@ -49,13 +49,13 @@ def validate(records):
                       "adjudication_method", "adjudicator_id"):
             if not isinstance(record[field], str) or not record[field].strip():
                 errors.append(f"{prefix}: empty or invalid {field}")
-        if record["domain"] not in DOMAINS:
+        if not isinstance(record["domain"], str) or record["domain"] not in DOMAINS:
             errors.append(f"{prefix}: unsupported domain")
         split = record["split"]
-        if split not in SPLITS:
+        if not isinstance(split, str) or split not in SPLITS:
             errors.append(f"{prefix}: unsupported split")
         family = record["source_family_id"]
-        if isinstance(family, str) and split in SPLITS:
+        if isinstance(family, str) and isinstance(split, str) and split in SPLITS:
             family_splits.setdefault(family, set()).add(split)
         for field in ("assumptions", "certificate_assumptions"):
             value = record[field]
@@ -63,9 +63,9 @@ def validate(records):
                 not isinstance(x, str) or not x.strip() for x in value
             ):
                 errors.append(f"{prefix}: {field} must be nonempty string list")
-        if record["truth_label"] not in LABELS:
+        if not isinstance(record["truth_label"], str) or record["truth_label"] not in LABELS:
             errors.append(f"{prefix}: invalid truth_label")
-        if record["certificate_status"] not in CERT_STATUSES:
+        if not isinstance(record["certificate_status"], str) or record["certificate_status"] not in CERT_STATUSES:
             errors.append(f"{prefix}: invalid certificate_status")
         if not isinstance(record["certificate_text"], str):
             errors.append(f"{prefix}: certificate_text must be a string")
@@ -76,7 +76,7 @@ def validate(records):
             errors.append(f"{prefix}: adjudication_evidence must be a string list")
         if record["truth_label"] != "unknown" and not evidence:
             errors.append(f"{prefix}: known truth requires adjudication evidence")
-        if record["certificate_status"] == "valid" and not record["certificate_text"].strip():
+        if record["certificate_status"] == "valid" and (not isinstance(record["certificate_text"], str) or not record["certificate_text"].strip()):
             errors.append(f"{prefix}: valid certificate requires certificate text")
         if record["certificate_status"] == "valid" and record["truth_label"] == "unknown":
             # Permitted: formal derivation validity does not prove physical truth.
