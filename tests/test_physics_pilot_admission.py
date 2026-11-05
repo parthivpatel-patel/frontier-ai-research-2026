@@ -91,25 +91,27 @@ class PhysicsPilotAdmissionTests(unittest.TestCase):
     def test_nonobject_rejected(self):
         self.assertTrue(any("record must be an object" in e for e in errors(None)))
 
-    @unittest.expectedFailure
     def test_malformed_list_domain_should_be_rejected_not_crash(self):
-        # Known validator weakness: unhashable membership in DOMAINS.
+        # Invalid JSON type must yield an admission error.
         self.assertTrue(errors(record(domain=[])))
 
-    @unittest.expectedFailure
     def test_malformed_list_split_should_be_rejected_not_crash(self):
-        # Known validator weakness: unhashable membership in SPLITS.
+        # Invalid JSON type must yield an admission error.
         self.assertTrue(errors(record(split=[])))
 
-    @unittest.expectedFailure
     def test_malformed_list_truth_label_should_be_rejected_not_crash(self):
-        # Known validator weakness: unhashable membership in LABELS.
+        # Invalid JSON type must yield an admission error.
         self.assertTrue(errors(record(truth_label=[])))
 
-    @unittest.expectedFailure
     def test_malformed_list_certificate_status_should_be_rejected_not_crash(self):
-        # Known validator weakness: unhashable membership in CERT_STATUSES.
+        # Invalid JSON type must yield an admission error.
         self.assertTrue(errors(record(certificate_status=[])))
+
+    def test_valid_certificate_nonstring_text_rejected_not_crash(self):
+        self.assertTrue(any("certificate_text must" in e for e in errors(record(certificate_status="valid", certificate_text=[]))))
+
+    def test_malformed_split_dictionary_rejected_not_crash(self):
+        self.assertTrue(any("unsupported split" in e for e in errors(record(split={}))))
 
 
 if __name__ == "__main__":
