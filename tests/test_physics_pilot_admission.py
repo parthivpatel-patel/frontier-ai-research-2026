@@ -54,7 +54,18 @@ class PhysicsPilotAdmissionTests(unittest.TestCase):
 
     def test_known_truth_with_evidence_is_schema_only(self):
         self.assertEqual(errors(record(truth_label="incorrect",
-                                       adjudication_evidence=["illustrative citation"])), [])
+                                       adjudication_evidence=["illustrative citation"],
+                                       adjudicator_id="reviewer_001",
+                                       adjudication_method="independent symbolic check")), [])
+
+    def test_known_truth_with_placeholder_adjudicator_rejected(self):
+        self.assertTrue(any("named independent adjudicator" in e for e in errors(
+            record(truth_label="correct", adjudication_evidence=["citation"])) ))
+
+    def test_known_truth_with_placeholder_method_rejected(self):
+        self.assertTrue(any("requires adjudication method" in e for e in errors(
+            record(truth_label="correct", adjudication_evidence=["citation"],
+                   adjudicator_id="reviewer_001"))))
 
     def test_duplicate_id_rejected(self):
         self.assertTrue(any("duplicate claim_id" in e for e in errors(record(), record())))
