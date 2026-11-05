@@ -74,8 +74,13 @@ def validate(records):
             not isinstance(x, str) or not x.strip() for x in evidence
         ):
             errors.append(f"{prefix}: adjudication_evidence must be a string list")
-        if record["truth_label"] != "unknown" and not evidence:
-            errors.append(f"{prefix}: known truth requires adjudication evidence")
+        if record["truth_label"] != "unknown":
+            if not evidence:
+                errors.append(f"{prefix}: known truth requires adjudication evidence")
+            if record["adjudicator_id"].strip().lower() in {"none", "unknown", "not adjudicated", "n/a"}:
+                errors.append(f"{prefix}: known truth requires named independent adjudicator")
+            if record["adjudication_method"].strip().lower() in {"none", "unknown", "not adjudicated", "n/a"}:
+                errors.append(f"{prefix}: known truth requires adjudication method")
         if record["certificate_status"] == "valid" and (not isinstance(record["certificate_text"], str) or not record["certificate_text"].strip()):
             errors.append(f"{prefix}: valid certificate requires certificate text")
         if record["certificate_status"] == "valid" and record["truth_label"] == "unknown":
