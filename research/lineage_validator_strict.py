@@ -87,7 +87,7 @@ def validate_strict_lineages(records):
                             ("source", row["source_id"]),
                             ("source_family", source_family)):
             groups[(kind, value)].add(row["split"])
-        key = (scenario_version, assumptions, proposition)
+        key = (row["scenario_id"], assumptions, proposition)
         if label is not None:
             previous = verdicts.setdefault(key, label)
             if previous != label:
