@@ -89,7 +89,7 @@ class PhysicsPilotAdmissionTests(unittest.TestCase):
 
     def test_unsupported_domain_rejected(self):
         self.assertTrue(any("unsupported domain" in e for e in errors(
-            record(domain="astrology")))
+            record(domain="astrology"))))
 
     def test_invalid_label_rejected(self):
         self.assertTrue(any("invalid truth_label" in e for e in errors(
