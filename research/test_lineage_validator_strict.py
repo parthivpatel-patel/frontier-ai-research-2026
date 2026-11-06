@@ -75,6 +75,19 @@ class StrictLineageTests(unittest.TestCase):
                 intervention_id="paraphrase", claim="speed unchanged")
         ]), 2)
 
+    def test_source_family_alias_rejected(self):
+        self.rejects([row(source_family_id="lineage_A"),
+                      row(scenario_id="s2", intervention_id="other",
+                          source_family_id="lineage_B")])
+
+    def test_scenario_physics_family_alias_rejected(self):
+        self.rejects([row(), row(intervention_id="other", family="circuits")])
+
+    def test_distinct_source_and_scenario_families_allowed(self):
+        self.assertEqual(validate_strict_lineages([
+            row(), row(scenario_id="s2", source_id="src2", family="circuits",
+                       intervention_id="other")]), 2)
+
     def test_unresolved(self):
         self.assertEqual(validate_strict_lineages([
             row(label=None, adjudicator=None)]), 1)
