@@ -74,7 +74,9 @@ class SelectionBiasNegativeControls(unittest.TestCase):
         # Missing truth prevents signing the full-population difference.
         lo, hi = sharp_difference_bounds(rows)
         self.assertLess(lo, 0)
-        self.assertGreater(hi, 0)
+        # The observed data allow equality at the sharp upper endpoint,
+        # but cannot establish strict superiority in either direction.
+        self.assertEqual(hi, Fraction(0))
 
     def test_shared_unknown_truth_cancels(self):
         rows = [claim(True, True, None, False),
