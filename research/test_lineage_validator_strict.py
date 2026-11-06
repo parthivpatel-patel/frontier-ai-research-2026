@@ -60,6 +60,21 @@ class StrictLineageTests(unittest.TestCase):
             row(intervention_id="drag", proposition_id="p1",
                 assumptions={"drag": True}, label="refuted")]), 2)
 
+    def test_scenario_version_cannot_hide_conflicting_truth(self):
+        self.rejects([
+            row(proposition_id="p1", scenario_version="v1"),
+            row(proposition_id="p1", scenario_version="v2",
+                intervention_id="paraphrase", claim="speed unchanged",
+                label="refuted")
+        ])
+
+    def test_scenario_version_does_not_block_valid_paraphrase(self):
+        self.assertEqual(validate_strict_lineages([
+            row(proposition_id="p1", scenario_version="v1"),
+            row(proposition_id="p1", scenario_version="v2",
+                intervention_id="paraphrase", claim="speed unchanged")
+        ]), 2)
+
     def test_unresolved(self):
         self.assertEqual(validate_strict_lineages([
             row(label=None, adjudicator=None)]), 1)
