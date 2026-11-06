@@ -13,7 +13,7 @@ from research.paired_partial_identification import paired_truth_bounds
 def record(i, a, b, hidden_truth, adjudicated):
     return {
         "id": f"synthetic-{i}", "source_id": f"synthetic-{i}",
-        "baseline": a, "candidate": b,
+        "baseline": bool(a), "candidate": bool(b),
         "false_claim": bool(hidden_truth) if adjudicated else None,
     }
 
