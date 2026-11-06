@@ -52,6 +52,8 @@ def validate_strict_lineages(records):
     seen = set()
     groups = defaultdict(set)
     verdicts = {}
+    source_families = {}
+    scenario_families = {}
     for index, row in enumerate(records):
         if type(row) is not dict or not REQUIRED.issubset(row):
             raise ValueError("missing or invalid row at " + str(index))
@@ -78,7 +80,13 @@ def validate_strict_lineages(records):
                 _string(row[optional], optional)
         proposition = row.get("proposition_id", row["claim"])
         source_family = row.get("source_family_id", row["source_id"])
-        scenario_version = row.get("scenario_version", row["scenario_id"])
+        # Each source and scenario must have a stable declared family.
+        previous_source_family = source_families.setdefault(row["source_id"], source_family)
+        if previous_source_family != source_family:
+            raise ValueError("source_id assigned to conflicting source families")
+        previous_scenario_family = scenario_families.setdefault(row["scenario_id"], row["family"])
+        if previous_scenario_family != row["family"]:
+            raise ValueError("scenario_id assigned to conflicting physics families")
         identity = (row["scenario_id"], row["intervention_id"], proposition)
         if identity in seen:
             raise ValueError("duplicate proposition/intervention identifier")
