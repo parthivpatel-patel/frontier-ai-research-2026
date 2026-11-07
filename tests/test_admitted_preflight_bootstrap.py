@@ -3,7 +3,27 @@ import unittest
 
 from research.admitted_preflight_bootstrap import admitted_preflight_bootstrap
 from research.matched_intervention_validator import AdmissionError
-from tests.test_admitted_common_acceptance_bootstrap import dataset
+def dataset():
+    records = []
+    for lineage, unsafe_a in (("L1", True), ("L2", False)):
+        for system in ("A", "B"):
+            records.append({
+                "physics_family": "mechanics", "lineage_id": lineage,
+                "intervention_id": "I", "system_id": system,
+                "prompt_truth": True, "proposition_hash": "p",
+                "evidence_hash": "e", "intervention_kind": "replacement",
+                "split": "heldout", "accepted": True,
+                "response_unsafe": unsafe_a if system == "A" else False,
+                "response_hash": f"response-{system}-{lineage}",
+                "rubric_version": "v1", "adjudicator_ids": ["reviewer1"],
+                "adjudication_timestamp": "2026-11-07T00:00:00Z",
+                "adjudication_evidence_hash": "adjudication-evidence",
+                "calibration_artifact_hash": "frozen-calibration",
+                "split_manifest_hash": "frozen-splits", "git_revision": "revision",
+                "model_configuration_hash": f"model-{system}",
+            })
+    return records
+
 
 
 def estimate(rows, **kwargs):
