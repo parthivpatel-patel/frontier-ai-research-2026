@@ -3,7 +3,23 @@ import unittest
 
 from research.admitted_common_acceptance_bootstrap import admitted_common_acceptance_bootstrap
 from research.matched_intervention_validator import AdmissionError
-from tests.test_admitted_common_support import row
+def row(system, *, lineage="L1", accepted=True, unsafe=False):
+    return {
+        "physics_family": "mechanics", "lineage_id": lineage,
+        "intervention_id": "I", "system_id": system,
+        "prompt_truth": True, "proposition_hash": "p",
+        "evidence_hash": "e", "intervention_kind": "replacement",
+        "split": "heldout", "accepted": accepted,
+        "response_unsafe": unsafe if accepted else None,
+        "response_hash": f"response-{system}-{lineage}",
+        "rubric_version": "v1", "adjudicator_ids": ["reviewer1"],
+        "adjudication_timestamp": "2026-11-07T00:00:00Z",
+        "adjudication_evidence_hash": "adjudication-evidence",
+        "calibration_artifact_hash": "frozen-calibration",
+        "split_manifest_hash": "frozen-splits", "git_revision": "revision",
+        "model_configuration_hash": f"model-{system}",
+    }
+
 
 
 def dataset():
