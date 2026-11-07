@@ -93,11 +93,11 @@ class PhysicsPilotAdmissionTests(unittest.TestCase):
 
     def test_invalid_label_rejected(self):
         self.assertTrue(any("invalid truth_label" in e for e in errors(
-            record(truth_label="probably_correct")))
+            record(truth_label="probably_correct"))))
 
     def test_empty_valid_certificate_rejected(self):
         self.assertTrue(any("valid certificate requires" in e for e in errors(
-            record(certificate_status="valid", certificate_text="")))
+            record(certificate_status="valid", certificate_text=""))))
 
     def test_nonobject_rejected(self):
         self.assertTrue(any("record must be an object" in e for e in errors(None)))
