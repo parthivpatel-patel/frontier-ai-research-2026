@@ -31,7 +31,7 @@ class Protocol078Integration(unittest.TestCase):
         rows = [record(i, *entry) for i, entry in enumerate(specification)]
         result = paired_truth_bounds(rows)
         lo, hi = result["candidate_minus_baseline_unsafe_bounds"]
-        self.assertLess(lo, 0)
+        self.assertEqual(lo, 0)
         self.assertGreater(hi, 0)
         self.assertFalse(result["strict_improvement_identified"])
         self.assertEqual(result["baseline_coverage"], result["candidate_coverage"])
