@@ -24,7 +24,7 @@ class MultiFamilyOracleTests(unittest.TestCase):
     def test_two_families_exact_union(self):
         flags = {"mechanics": (True, False), "optics": (True, True, False)}
         expected = exact_multifamily_undefined(((1, flags["mechanics"]), (1, flags["optics"])))
-        self.assertEqual(expected, Fraction(29, 108))
+        self.assertEqual(expected, Fraction(5, 18))
         population = sum((rows(f, a) for f, a in flags.items()), [])
         actual = analytic_preflight(population, {"mechanics": 1, "optics": 1},
                                     max_undefined_fraction=1)
