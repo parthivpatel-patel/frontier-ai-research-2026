@@ -94,7 +94,7 @@ class PairedDiscordanceContract(unittest.TestCase):
         r = paired_oracle(a, b)
         self.assertEqual(r["n10"], 6)
         self.assertEqual(r["delta_yield"], 1)
-        self.assertEqual(r["p_independent_pairs"], 0.03125)
+        self.assertAlmostEqual(r["p_independent_pairs"], 0.03125, places=12)
 
     def test_identical_outputs(self):
         x = {"p": (True, False), "q": (True, True), "r": (False, None)}
