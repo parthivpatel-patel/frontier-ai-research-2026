@@ -6,6 +6,29 @@ import math
 import unittest
 
 
+def exact_two_sided_binomial_p(discordant, minority):
+    """Stable exact two-sided binomial tail under independent paired trials.
+
+    This does not adjust for correlated questions or paraphrase clusters.
+    """
+    if type(discordant) is not int or type(minority) is not int:
+        raise ValueError("counts must be integers")
+    if discordant < 0 or not 0 <= minority <= discordant // 2:
+        raise ValueError("invalid discordance counts")
+    if discordant == 0 or 2 * minority == discordant:
+        return 1.0
+    log2 = math.log(2.0)
+    # Recurrence avoids large binomial integers and cancellation near 1.
+    log_term = -discordant * log2
+    log_total = log_term
+    for k in range(1, minority + 1):
+        log_term += math.log(discordant - k + 1) - math.log(k)
+        log_total = math.logaddexp(log_total, log_term) if hasattr(math, "logaddexp") else (
+            max(log_total, log_term) + math.log1p(math.exp(-abs(log_total - log_term)))
+        )
+    return min(1.0, math.exp(log2 + log_total))
+
+
 def paired_oracle(a, b):
     """Return paired unconditional-correctness and selection accounting.
 
@@ -44,7 +67,7 @@ def paired_oracle(a, b):
     n10, n01 = counts["n10"], counts["n01"]
     discordant = n10 + n01
     # Exact two-sided conditional binomial test, valid for independent pairs.
-    p = min(1.0, 2.0 * sum(math.comb(discordant, k) for k in range(min(n10, n01) + 1)) / (2 ** discordant))
+    p = exact_two_sided_binomial_p(discordant, min(n10, n01))
     return {"n": n, **counts, **selection, "delta_yield": (n10 - n01) / n,
             "p_independent_pairs": p}
 
