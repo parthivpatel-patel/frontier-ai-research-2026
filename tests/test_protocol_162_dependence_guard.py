@@ -48,7 +48,7 @@ class DependenceGuard(unittest.TestCase):
         a = {i: (True, True) for i in range(6)}
         b = {i: (True, False) for i in range(6)}
         r = paired_report_with_groups(a, b, {i: i for i in range(6)})
-        self.assertEqual(r["p_independent_pairs"], 0.03125)
+        self.assertAlmostEqual(r["p_independent_pairs"], 0.03125, places=12)
         self.assertFalse(r["independence_assumption_verified"])
 
     def test_reject_missing_group(self):
