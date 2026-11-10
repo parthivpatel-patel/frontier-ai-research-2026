@@ -123,13 +123,20 @@ class IntegrityTests(unittest.TestCase):
         doc["assignment"] = {"synthetic_1": ["correct", "matched_shuffle"]}
         self.assert_rejected(doc)
 
-    @unittest.expectedFailure
     def test_nested_answer_leakage_must_be_rejected(self):
-        # Known gap: top-level denylist does not inspect nested visible content.
+        # Nested metadata must be screened recursively.
         doc = fixture()
         for condition in ("correct", "matched_shuffle"):
             a = doc["pairs"][0]["arms"][condition]
             a["invariant"]["metadata"] = {"gold_answer": "yes"}
+            doc["pairs"][0]["arms"][condition] = arm(a["invariant"], a["links"])
+        self.assert_rejected(doc)
+
+    def test_answer_leakage_in_nested_list(self):
+        doc = fixture()
+        for condition in ("correct", "matched_shuffle"):
+            a = doc["pairs"][0]["arms"][condition]
+            a["invariant"]["notes"] = [{"nested": [{"gold_label": "valid"}]}]
             doc["pairs"][0]["arms"][condition] = arm(a["invariant"], a["links"])
         self.assert_rejected(doc)
 
