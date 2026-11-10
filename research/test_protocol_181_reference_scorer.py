@@ -111,5 +111,41 @@ class ScorerContractTests(unittest.TestCase):
             module.score(rows)
 
 
+    def test_malformed_identifiers_rejected(self):
+        for value in ([], {}, False, 7, " ", " padded"):
+            with self.subTest(value=value):
+                a, b = record("correct"), record("matched_shuffle")
+                a["source_id"] = value
+                b["source_id"] = value
+                with self.assertRaises(module.InvalidPilot):
+                    module.score([a, b])
+
+    def test_invalid_budgets_rejected(self):
+        for value in (0, -1, True, float("nan"), float("inf"), "100"):
+            with self.subTest(value=value):
+                a, b = record("correct"), record("matched_shuffle")
+                a["compute_budget"] = value
+                b["compute_budget"] = value
+                with self.assertRaises(module.InvalidPilot):
+                    module.score([a, b])
+
+    def test_multiple_manifests_rejected(self):
+        rows = [record("correct"), record("matched_shuffle"),
+                record("correct", edit="e2"), record("matched_shuffle", edit="e2")]
+        rows[2]["run_manifest_hash"] = "manifest2"
+        rows[3]["run_manifest_hash"] = "manifest2"
+        with self.assertRaises(module.InvalidPilot):
+            module.score(rows)
+
+    def test_invalid_metadata_and_seed_rejected(self):
+        for field, value in (("rule_inventory_hash", ""), ("model_or_verifier_version", None),
+                             ("assignment_seed", True), ("assignment_seed", -1)):
+            with self.subTest(field=field, value=value):
+                a, b = record("correct"), record("matched_shuffle")
+                a[field] = value
+                b[field] = value
+                with self.assertRaises(module.InvalidPilot):
+                    module.score([a, b])
+
 if __name__ == "__main__":
     unittest.main()
