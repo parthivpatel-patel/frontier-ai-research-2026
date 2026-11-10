@@ -20,8 +20,12 @@ jobs:
     steps:
       - name: Check out research source
         uses: actions/checkout@v4
-      - name: Run Python standard-library tests
-        run: python3 -m unittest discover -s tests -v
+      - name: Install pinned test runner
+        run: python3 -m pip install pytest==8.3.5
+      - name: Collect tests and record discovery count
+        run: python3 -m pytest --collect-only -q tests
+      - name: Run complete Python test suite
+        run: python3 -m pytest -q tests
       - name: Print synthetic sanity-check JSON to job log
         run: python3 -m src.toy_falsification --count 256 --seed 20261101
       - name: Print semantic-oracle stress diagnostics
