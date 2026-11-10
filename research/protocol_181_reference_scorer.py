@@ -7,6 +7,7 @@ Run only on a verified no-charge cloud runner.
 """
 import argparse
 import json
+import math
 from collections import defaultdict
 from pathlib import Path
 
@@ -28,6 +29,7 @@ class InvalidPilot(ValueError):
 def score(rows):
     """Fail closed on incomplete pairs; return descriptive source-weighted yield."""
     pairs = defaultdict(dict)
+    manifests = set()
     for index, row in enumerate(rows, 1):
         if not isinstance(row, dict) or REQUIRED - row.keys():
             raise InvalidPilot(f"row {index}: missing required fields")
@@ -37,6 +39,18 @@ def score(rows):
             raise InvalidPilot(f"row {index}: unadjudicated")
         if row["label_edited"] not in LABELS or row["verifier_output"] not in VERDICTS:
             raise InvalidPilot(f"row {index}: invalid label/verdict")
+        for field in KEY_FIELDS + ("physics_family", "edit_stratum", "rule_inventory_hash",
+                                   "prompt_hash", "model_or_verifier_version"):
+            value = row[field]
+            if not isinstance(value, str) or not value.strip() or value != value.strip():
+                raise InvalidPilot(f"row {index}: invalid nonempty string {field}")
+        for field in ("token_budget", "compute_budget"):
+            value = row[field]
+            if type(value) not in (int, float) or not math.isfinite(value) or value <= 0:
+                raise InvalidPilot(f"row {index}: invalid positive finite budget {field}")
+        if type(row["assignment_seed"]) is not int or row["assignment_seed"] < 0:
+            raise InvalidPilot(f"row {index}: invalid assignment_seed")
+        manifests.add(row["run_manifest_hash"])
         cond = row["provenance_condition"]
         if cond not in CONDITIONS:
             raise InvalidPilot(f"row {index}: unknown condition")
@@ -47,6 +61,8 @@ def score(rows):
             raise InvalidPilot(f"row {index}: duplicate condition")
         pairs[key][cond] = row
 
+    if len(manifests) != 1:
+        raise InvalidPilot("multiple manifests require a prespecified hierarchical estimator")
     if not pairs:
         raise InvalidPilot("no eligible pairs")
     by_source = defaultdict(list)
