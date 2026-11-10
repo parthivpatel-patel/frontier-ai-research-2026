@@ -128,6 +128,20 @@ def validate(document):
             return sorted((x["source"], x["type"], x["scope"]) for x in links)
         if signatures(correct) != signatures(shuffled):
             raise ValueError("link type/scope/source mismatch")
+        # A shuffle must not change target degree within link type/scope strata.
+        def target_strata(links):
+            strata = {}
+            for link in links:
+                stratum = (link["type"], link["scope"])
+                strata.setdefault(stratum, []).append(link["target"])
+            return {key: sorted(values) for key, values in strata.items()}
+        if target_strata(correct) != target_strata(shuffled):
+            raise ValueError("target multiset differs within type/scope stratum")
+        def unique_edges(links):
+            return {(x["source"], x["target"], x["type"], x["scope"])
+                    for x in links}
+        if len(unique_edges(correct)) != len(correct) or len(unique_edges(shuffled)) != len(shuffled):
+            raise ValueError("duplicate provenance link")
     if set(assignment) != seen:
         raise ValueError("unregistered assignment or attrition")
     return {"accepted_pairs": len(pairs), "status": "structural_gate_only"}
