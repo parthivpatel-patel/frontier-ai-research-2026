@@ -51,18 +51,24 @@ def score(rows):
         raise InvalidPilot("no eligible pairs")
     by_source = defaultdict(list)
     by_family = defaultdict(set)
+    source_family = {}
     for key, conditions in pairs.items():
         if set(conditions) != CONDITIONS:
             raise InvalidPilot(f"incomplete pair: {key}")
         a, b = (conditions[c] for c in ("correct", "matched_shuffle"))
         for field in ("label_edited", "physics_family", "edit_stratum",
-                      "rule_inventory_hash", "token_budget", "compute_budget",
+                      "rule_inventory_hash", "prompt_hash", "token_budget", "compute_budget",
                       "assignment_seed", "model_or_verifier_version"):
             if a[field] != b[field]:
                 raise InvalidPilot(f"pair {key}: mismatch in {field}")
         def correct(r):
             return int(r["verifier_output"] == r["label_edited"])
-        by_source[key[0]].append(correct(a) - correct(b))
+        source = key[0]
+        family = a["physics_family"]
+        if source in source_family and source_family[source] != family:
+            raise InvalidPilot(f"source {source}: inconsistent physics_family")
+        source_family[source] = family
+        by_source[source].append(correct(a) - correct(b))
         by_family[a["physics_family"]].add(key[0])
     source_effects = {s: sum(ds)/len(ds) for s, ds in sorted(by_source.items())}
     return {
