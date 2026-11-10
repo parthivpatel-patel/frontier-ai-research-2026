@@ -16,6 +16,26 @@ import sys
 HEX = re.compile(r"^[0-9a-f]{64}$")
 CONDITIONS = ("correct", "matched_shuffle")
 ALLOWED_LINK_KEYS = {"source", "target", "type", "scope"}
+LEAKAGE_KEYS = {"gold_answer", "gold_label", "condition", "provenance_condition", "verdict"}
+
+
+def reject_nested_leakage(value):
+    """Reject prohibited field names at any depth in model-visible invariant data.
+
+    This is a syntactic safeguard, not a semantic leakage detector: answers
+    embedded in ordinary prose remain a separately audited risk.
+    """
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if not isinstance(key, str):
+                raise ValueError("non-string invariant key")
+            if key.casefold() in LEAKAGE_KEYS:
+                raise ValueError("potential nested answer/condition leakage")
+            reject_nested_leakage(child)
+    elif isinstance(value, list):
+        for child in value:
+            reject_nested_leakage(child)
+
 
 
 def canonical(value):
@@ -72,9 +92,7 @@ def validate(document):
             invariant, links = arm.get("invariant"), arm.get("links")
             if not isinstance(invariant, dict) or not isinstance(links, list) or not links:
                 raise ValueError("invalid invariant or links")
-            if any(k.lower() in {"gold_answer", "gold_label", "condition",
-                                  "provenance_condition", "verdict"} for k in invariant):
-                raise ValueError("potential answer/condition leakage")
+            reject_nested_leakage(invariant)
             allowed_targets = invariant.get("allowed_target_ids")
             if not isinstance(allowed_targets, list) or not allowed_targets:
                 raise ValueError("missing allowed target universe")
