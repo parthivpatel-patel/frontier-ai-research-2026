@@ -92,17 +92,15 @@ class ScorerContractTests(unittest.TestCase):
         with self.assertRaises(module.InvalidPilot):
             module.score([record("correct"), row])
 
-    @unittest.expectedFailure
     def test_prompt_hash_mismatch_must_be_rejected(self):
-        """Known gap: current scorer does not compare prompt_hash across pairs."""
+        """Regression: paired prompt hashes must agree."""
         row = record("matched_shuffle")
         row["prompt_hash"] = "different"
         with self.assertRaises(module.InvalidPilot):
             module.score([record("correct"), row])
 
-    @unittest.expectedFailure
     def test_cross_edit_source_family_mismatch_must_be_rejected(self):
-        """Known gap: current scorer does not enforce source-level family consistency."""
+        """Regression: source family cannot change across edits."""
         rows = [
             record("correct"), record("matched_shuffle"),
             record("correct", edit="e2"), record("matched_shuffle", edit="e2"),
