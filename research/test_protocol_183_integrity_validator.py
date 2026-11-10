@@ -35,8 +35,12 @@ def fixture():
         "tolerance": 0.001,
     }
     correct = [{"source": "step_1", "target": "constraint_A",
+                "type": "depends_on", "scope": "step"},
+               {"source": "step_2", "target": "constraint_B",
                 "type": "depends_on", "scope": "step"}]
     shuffled = [{"source": "step_1", "target": "constraint_B",
+                 "type": "depends_on", "scope": "step"},
+                {"source": "step_2", "target": "constraint_A",
                  "type": "depends_on", "scope": "step"}]
     return {"schema_version": "183.1",
             "assignment": {"synthetic_1": ["correct", "matched_shuffle"]},
@@ -52,6 +56,20 @@ class IntegrityTests(unittest.TestCase):
 
     def test_valid_structural_fixture(self):
         self.assertEqual(validate(fixture())["accepted_pairs"], 1)
+
+    def test_target_multiset_drift_rejected(self):
+        doc = fixture()
+        a = doc["pairs"][0]["arms"]["matched_shuffle"]
+        a["links"][1]["target"] = "constraint_B"
+        doc["pairs"][0]["arms"]["matched_shuffle"] = arm(a["invariant"], a["links"])
+        self.assert_rejected(doc)
+
+    def test_duplicate_edges_rejected(self):
+        doc = fixture()
+        a = doc["pairs"][0]["arms"]["matched_shuffle"]
+        a["links"][1] = copy.deepcopy(a["links"][0])
+        doc["pairs"][0]["arms"]["matched_shuffle"] = arm(a["invariant"], a["links"])
+        self.assert_rejected(doc)
 
     def test_duplicate_json_keys(self):
         with self.assertRaises(ValueError):
