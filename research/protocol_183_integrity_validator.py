@@ -75,6 +75,8 @@ def validate(document):
         raise ValueError("missing assignment or pairs")
     seen = set()
     for pair in pairs:
+        if not isinstance(pair, dict):
+            raise ValueError("pair must be an object")
         key = pair.get("item_key")
         if not isinstance(key, str) or not key.strip() or key in seen:
             raise ValueError("duplicate or invalid item key")
