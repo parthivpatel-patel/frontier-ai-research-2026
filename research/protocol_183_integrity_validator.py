@@ -142,6 +142,9 @@ def validate(document):
                     for x in links}
         if len(unique_edges(correct)) != len(correct) or len(unique_edges(shuffled)) != len(shuffled):
             raise ValueError("duplicate provenance link")
+        # Reordering JSON list entries is not a changed provenance graph.
+        if unique_edges(correct) == unique_edges(shuffled):
+            raise ValueError("shuffle changes ordering only, not provenance edges")
     if set(assignment) != seen:
         raise ValueError("unregistered assignment or attrition")
     return {"accepted_pairs": len(pairs), "status": "structural_gate_only"}
