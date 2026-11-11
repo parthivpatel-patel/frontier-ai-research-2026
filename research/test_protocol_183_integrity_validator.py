@@ -57,6 +57,15 @@ class IntegrityTests(unittest.TestCase):
     def test_valid_structural_fixture(self):
         self.assertEqual(validate(fixture())["accepted_pairs"], 1)
 
+    def test_order_only_shuffle_rejected(self):
+        # Same graph with reversed serialization order is not a treatment.
+        doc = fixture()
+        a = doc["pairs"][0]["arms"]["matched_shuffle"]
+        correct = doc["pairs"][0]["arms"]["correct"]["links"]
+        doc["pairs"][0]["arms"]["matched_shuffle"] = arm(
+            a["invariant"], list(reversed(correct)))
+        self.assert_rejected(doc)
+
     def test_target_multiset_drift_rejected(self):
         doc = fixture()
         a = doc["pairs"][0]["arms"]["matched_shuffle"]
