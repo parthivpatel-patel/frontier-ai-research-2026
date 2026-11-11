@@ -80,6 +80,14 @@ class IntegrityTests(unittest.TestCase):
         doc["pairs"][0]["arms"]["matched_shuffle"] = arm(a["invariant"], a["links"])
         self.assert_rejected(doc)
 
+    def test_non_object_pair_rejected(self):
+        # Malformed audit JSON must fail closed, not crash with AttributeError.
+        for malformed in (None, [], "not-an-object", 42):
+            with self.subTest(malformed=malformed):
+                doc = fixture()
+                doc["pairs"] = [malformed]
+                self.assert_rejected(doc)
+
     def test_duplicate_json_keys(self):
         with self.assertRaises(ValueError):
             strict_json('{"a":1,"a":2}')
