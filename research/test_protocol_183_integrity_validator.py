@@ -32,6 +32,7 @@ def fixture():
     invariant = {
         "problem": "Synthetic dimensional-consistency check, not an observation",
         "allowed_target_ids": ["constraint_A", "constraint_B"],
+        "allowed_source_ids": ["step_1", "step_2"],
         "tolerance": 0.001,
     }
     correct = [{"source": "step_1", "target": "constraint_A",
@@ -56,6 +57,39 @@ class IntegrityTests(unittest.TestCase):
 
     def test_valid_structural_fixture(self):
         self.assertEqual(validate(fixture())["accepted_pairs"], 1)
+
+    def test_unregistered_source_rejected(self):
+        doc = fixture()
+        for condition in ("correct", "matched_shuffle"):
+            a = doc["pairs"][0]["arms"][condition]
+            a["links"][0]["source"] = "invented_step_999"
+            doc["pairs"][0]["arms"][condition] = arm(a["invariant"], a["links"])
+        self.assert_rejected(doc)
+
+    def test_invalid_source_target_universes_rejected(self):
+        for field, replacement in (
+            ("allowed_source_ids", ["step_1", "step_1"]),
+            ("allowed_source_ids", ["step_1", 2]),
+            ("allowed_source_ids", []),
+            ("allowed_target_ids", ["constraint_A", "constraint_A"]),
+            ("allowed_target_ids", ["constraint_A", None]),
+            ("allowed_target_ids", ["step_1", "constraint_B"]),
+        ):
+            with self.subTest(field=field, replacement=replacement):
+                doc = fixture()
+                for condition in ("correct", "matched_shuffle"):
+                    a = doc["pairs"][0]["arms"][condition]
+                    a["invariant"][field] = replacement
+                    doc["pairs"][0]["arms"][condition] = arm(a["invariant"], a["links"])
+                self.assert_rejected(doc)
+
+    def test_missing_source_universe_rejected(self):
+        doc = fixture()
+        for condition in ("correct", "matched_shuffle"):
+            a = doc["pairs"][0]["arms"][condition]
+            del a["invariant"]["allowed_source_ids"]
+            doc["pairs"][0]["arms"][condition] = arm(a["invariant"], a["links"])
+        self.assert_rejected(doc)
 
     def test_order_only_shuffle_rejected(self):
         # Same graph with reversed serialization order is not a treatment.
