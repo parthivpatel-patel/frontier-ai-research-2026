@@ -98,12 +98,21 @@ def validate(document):
             allowed_targets = invariant.get("allowed_target_ids")
             if not isinstance(allowed_targets, list) or not allowed_targets:
                 raise ValueError("missing allowed target universe")
+            allowed_sources = invariant.get("allowed_source_ids")
+            def valid_universe(ids):
+                return (isinstance(ids, list) and bool(ids)
+                        and all(isinstance(x, str) and bool(x.strip()) for x in ids)
+                        and len(set(ids)) == len(ids))
+            if not valid_universe(allowed_sources) or not valid_universe(allowed_targets):
+                raise ValueError("invalid source or target universe")
+            if set(allowed_sources) & set(allowed_targets):
+                raise ValueError("ambiguous source/target namespace collision")
             for link in links:
                 if not isinstance(link, dict) or set(link) != ALLOWED_LINK_KEYS:
                     raise ValueError("invalid link fields")
                 if not all(isinstance(link[k], str) and link[k] for k in ALLOWED_LINK_KEYS):
                     raise ValueError("empty link attribute")
-                if link["target"] not in allowed_targets or link["source"] == link["target"]:
+                if link["target"] not in allowed_targets or link["source"] not in allowed_sources or link["source"] == link["target"]:
                     raise ValueError("inadmissible target")
             transmitted = arm.get("full_input_utf8")
             if not isinstance(transmitted, str):
