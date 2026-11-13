@@ -28,7 +28,7 @@ class NegativeControls(TestCase):
     def test_joint_positive_not_total_agreement(self):
         # Both populations have P(++)=1/4, but total agreement differs.
         first=joint_table(F(1,2),F(1,4),F(1,4),F(1,2),F(1,2),F(1,2),F(1,2))
-        second=joint_table(F(1,2),F(1,4),F(1,4),F(3,4),F(3,4),F(3,4),F(3,4))
+        second=joint_table(F(1,2),F(1,4),F(1,4),F(1,4),F(1,4),F(1,4),F(1,4))
         self.assertEqual(first[0],second[0])
         self.assertNotEqual(first[0]+first[3],second[0]+second[3])
         self.assertEqual(sum(first),1)
