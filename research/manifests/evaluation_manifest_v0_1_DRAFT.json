@@ -1,0 +1,57 @@
+{
+  "schema_version": "0.1.0",
+  "status": "DRAFT_NOT_FROZEN",
+  "protocol": "research/PROTOCOL_061_AUDIT_LABEL_FIREWALL_AND_EVALUATION_LEAKAGE.md",
+  "created_utc_date": "2026-11-13",
+  "claims": {
+    "population_sha256": null,
+    "family_assignment_sha256": null,
+    "source_corpus_sha256": null,
+    "partition_manifest_sha256": null,
+    "domain_counts": {"nlp": null, "mathematics": null, "physics": null},
+    "family_disjoint_verified": false
+  },
+  "verifiers": {
+    "model_and_revision_manifest_sha256": null,
+    "prompt_manifest_sha256": null,
+    "sampling_settings_sha256": null
+  },
+  "evaluation": {
+    "primary_endpoint": "false_acceptance_among_released_at_fixed_coverage",
+    "target_release_coverage": null,
+    "coverage_tolerance": null,
+    "domain_weights": null,
+    "baseline_manifest_sha256": null,
+    "calibration_families_sha256": null,
+    "test_families_sha256": null,
+    "threshold_selection_partition": null,
+    "heldout_labels_accessed": false,
+    "test_set_single_use": true,
+    "family_cluster_uncertainty_method": null,
+    "audit_sampling_design_sha256": null,
+    "audit_inclusion_witness_sha256": null,
+    "audit_budget": null,
+    "missing_label_policy": null,
+    "multiplicity_policy": null
+  },
+  "infrastructure": {
+    "provider": null,
+    "account_specific_zero_cost_verified": false,
+    "standard_free_runner_verified": false,
+    "billing_and_card_exposure_verified": false,
+    "external_paid_api_allowed": false,
+    "local_compute_allowed": false,
+    "cloud_execution_authorized": false
+  },
+  "freeze": {
+    "frozen": false,
+    "freeze_commit_sha": null,
+    "freeze_utc_timestamp": null,
+    "independent_reviewer": null
+  },
+  "publication": {
+    "novelty_established": false,
+    "heldout_experiments_completed": false,
+    "ai_assistance_disclosure_required": true
+  }
+}
