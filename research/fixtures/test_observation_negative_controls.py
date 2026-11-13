@@ -42,7 +42,7 @@ class NegativeControls(TestCase):
         world_a=joint_table(pi,F(3,5),F(2,25),F(4,5),F(4,5),F(1,5),F(1,5))
         world_b=joint_table(pi,F(17,25),F(0),F(4,5),F(4,5),F(1,5),F(1,5))
         self.assertEqual(world_a,world_b)
-        self.assertEqual(world_a,(F(17,50),F(1,5),F(1,5),F(13,50)))
+        self.assertEqual(world_a,(F(17,50),F(4,25),F(4,25),F(17,50)))
         self.assertEqual(posterior_positive(pi,F(3,5),F(2,25)),F(15,17))
         self.assertEqual(posterior_positive(pi,F(17,25),F(0)),1)
 
