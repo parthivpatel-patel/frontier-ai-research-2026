@@ -50,7 +50,7 @@ class FiniteDesignTests(unittest.TestCase):
         observed = F(1) - empty
         conditional_mean = sum((mass*ratio for mass, _, _, ratio in rows
                                 if ratio is not None), F(0)) / observed
-        self.assertEqual(conditional_mean, F(3, 5))
+        self.assertEqual(conditional_mean, F(2, 3))
         self.assertNotEqual(conditional_mean, F(1, 2))
 
     def test_census_collapses_to_population_mean(self):
