@@ -13,22 +13,26 @@ def released_risk_bounds(records, *, census):
     Each record: (released: bool, resolved: bool, false: bool | None).
     Non-released claims do not enter the released-claim estimand.
     """
-    if not census:
+    if type(census) is not bool or not census:
         raise ValueError("sample-only records cannot establish census bounds")
     if not isinstance(records, (tuple, list)):
         raise TypeError("records must be a sequence")
+    for record in records:
+        if not isinstance(record, (tuple, list)) or len(record) != 3:
+            raise ValueError("each record must contain exactly three fields")
+        released_flag, resolved, truth = record
+        if type(released_flag) is not bool or type(resolved) is not bool:
+            raise ValueError("release and resolution must be booleans")
+        if resolved and type(truth) is not bool:
+            raise ValueError("resolved label must be boolean")
+        if not resolved and truth is not None:
+            raise ValueError("unresolved label must not masquerade as observed")
     released = [r for r in records if r[0]]
     if not released:
         raise ValueError("false-release fraction undefined with no releases")
     false_known = 0
     unresolved = 0
     for released_flag, resolved, truth in records:
-        if not isinstance(released_flag, bool) or not isinstance(resolved, bool):
-            raise ValueError("release and resolution must be booleans")
-        if resolved and not isinstance(truth, bool):
-            raise ValueError("resolved label must be boolean")
-        if not resolved and truth is not None:
-            raise ValueError("unresolved label must not masquerade as observed")
         if released_flag:
             false_known += int(resolved and truth is True)
             unresolved += int(not resolved)
@@ -74,6 +78,24 @@ class Protocol079ExactWitness(unittest.TestCase):
     def test_sample_only_rejected(self):
         with self.assertRaises(ValueError):
             released_risk_bounds(observed_record((False, False)), census=False)
+
+    def test_adversarial_record_shapes_rejected(self):
+        malformed = [[], [()], [(True,)], [(1, True, True)],
+                     [(True, 1, True)], [(False, True)],
+                     [(False, True, 1)], [(False, False, False)],
+                     [(True, True, True), ()], [None]]
+        for records in malformed:
+            with self.subTest(records=records):
+                with self.assertRaises(ValueError):
+                    released_risk_bounds(records, census=True)
+
+    def test_valid_nonreleased_unresolved_record(self):
+        self.assertEqual(released_risk_bounds(
+            [(False, False, None), (True, True, True)], census=True), (1.0, 1.0))
+
+    def test_strict_census_flag(self):
+        with self.assertRaises(ValueError):
+            released_risk_bounds([(True, True, True)], census=0)
 
     def test_invalid_resolved_label_rejected(self):
         with self.assertRaises(ValueError):
