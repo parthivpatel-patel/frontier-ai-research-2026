@@ -44,7 +44,7 @@ For certainty families p_g=1, the corresponding term is zero. This variance is c
 ## Deterministic negative-control examples (analytic, not test results)
 
 - One family, p=1, Z=0.2: Delta_hat=0.2 and V_hat=0.
-- One family, p=0.5, Z=0.2: if sampled, Delta_hat=0.4 and V_hat=0.04; if not sampled, Delta_hat=0 and V_hat=0. True design variance is 0.04. This illustrates why a single realized V_hat is not a guarantee.
+- One family, p=0.5, Z=0.2: if sampled, Delta_hat=0.4 and V_hat=0.08; if not sampled, Delta_hat=0 and V_hat=0. True design variance is 0.04. Since sampling occurs with probability 0.5, E[V_hat]=0.5(0.08)+0.5(0)=0.04. This illustrates why a single realized V_hat is not a guarantee.
 - Two claims in the same family with contributions +0.3 and -0.3: Z_g=0, so the family's contrast contribution and variance are zero. Squaring claim contributions separately would falsely report positive variance.
 - Two families, each p=0.5, Z_1=0.2 and Z_2=-0.1: true Delta=0.1 and true design variance=0.05. Across the four equally likely sample outcomes, Delta_hat is 0, 0.4, -0.2, or 0.2; their mean is 0.1 and population variance is 0.05.
 - If a family has p=0, reject rather than silently removing it.
