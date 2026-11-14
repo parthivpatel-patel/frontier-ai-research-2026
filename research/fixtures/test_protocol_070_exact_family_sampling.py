@@ -16,6 +16,8 @@ def exact_design(z, probabilities):
         raise ValueError("finite contributions required")
     if any(not math.isfinite(float(p)) or p <= 0 or p > 1 for p in probabilities):
         raise ValueError("inclusion probabilities must lie in (0,1]")
+    if len(z) > 12:
+        raise ValueError("exact enumeration capped at 12 families")
     outcomes = []
     for bits in itertools.product((0, 1), repeat=len(z)):
         probability = math.prod(p if bit else 1 - p
@@ -33,13 +35,15 @@ def exact_design(z, probabilities):
 
 def family_contrast(claims, denominator_candidate, denominator_baseline):
     """claims: (weight, false_label, candidate_release, baseline_release)."""
-    if denominator_candidate <= 0 or denominator_baseline <= 0:
-        raise ValueError("release denominators must be positive")
+    if (not all(math.isfinite(float(d)) and float(d) > 0
+                for d in (denominator_candidate, denominator_baseline))):
+        raise ValueError("release denominators must be finite and positive")
     result = 0.0
     for weight, label, candidate, baseline in claims:
         if label not in (0, 1):
             raise ValueError("truth label must be resolved and binary")
-        if candidate not in (0, 1) or baseline not in (0, 1) or weight < 0:
+        if (candidate not in (0, 1) or baseline not in (0, 1)
+                or not math.isfinite(float(weight)) or weight < 0):
             raise ValueError("invalid release or weight")
         result += weight * label * (
             candidate / denominator_candidate - baseline / denominator_baseline
@@ -92,6 +96,28 @@ class Protocol070ExactDesignTests(unittest.TestCase):
     def test_reject_zero_release_denominator(self):
         with self.assertRaises(ValueError):
             family_contrast([(1.0, 1, 1, 0)], 0.0, 1.0)
+
+    def test_reject_nonfinite_denominators(self):
+        for bad in (float("nan"), float("inf"), -float("inf")):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                family_contrast([(1.0, 1, 1, 0)], bad, 1.0)
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                family_contrast([(1.0, 1, 1, 0)], 1.0, bad)
+
+    def test_reject_nonfinite_weights(self):
+        for bad in (float("nan"), float("inf"), -float("inf")):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                family_contrast([(bad, 1, 1, 0)], 1.0, 1.0)
+
+    def test_enumeration_cap(self):
+        with self.assertRaises(ValueError):
+            exact_design([0.0] * 13, [0.5] * 13)
+
+    def test_realized_variance_one_sampled_family(self):
+        p, z = 0.5, 0.2
+        realized = (1 - p) * z**2 / p**2
+        self.assertAlmostEqual(realized, 0.08)
+        self.assertAlmostEqual(exact_design([z], [p])[2], 0.04)
 
     def test_family_contrast_definition(self):
         value = family_contrast([(2.0, 1, 1, 0), (1.0, 0, 1, 1)],
