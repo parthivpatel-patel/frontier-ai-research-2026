@@ -1,35 +1,37 @@
-"""Protocol 099: fail-closed admission wrapper for Protocol 093.
+"""Protocol 099: structural admission and independent policy-witness checks.
 
-Standard-library-only. Do not run on the user's laptop. This wrapper is
-not a process-level CPU, memory, or wall-time sandbox.
+Standard-library only. Run only on verified zero-cost cloud infrastructure.
+Structural limits do not replace OS-enforced memory and wall-time limits.
 """
 from fractions import Fraction
-from protocol_098_structural_preflight import admit, PreflightRefusal
+from protocol_098_structural_preflight import admit
 from test_protocol_093_complete_policy_trees import certify, STOP
 
 
 def bounded_certify(costs, budget, worlds, *, max_trees=10000,
-                    max_claims=6, max_worlds=64, max_budget=12,
-                    max_cost=12):
-    """Validate and count *before* constructing contingent policy trees.
+                    max_generator_events=1000000, max_claims=6,
+                    max_worlds=64, max_budget=12, max_cost=12):
+    """Admit by complete-policy count, then separately cap generator events.
 
-    Returns the original oracle's (optimal value, witness, generated count).
-    An admitted call must still run in a separately resource-limited process.
+    The two caps measure different quantities. An Intractable refusal from
+    the generator is not evidence of a structural-count disagreement.
     """
+    if type(max_generator_events) is not int or max_generator_events < 1:
+        raise ValueError("invalid generator-event cap")
     predicted = admit(costs, budget, worlds, max_claims=max_claims,
                       max_trees=max_trees, max_worlds=max_worlds,
                       max_budget=max_budget, max_cost=max_cost)
-    # The original cap counts generator activity, not just complete policies.
-    # Keep it as a second, potentially stricter safety stop; do not equate it
-    # to the structural count.
-    value, witness, actual = certify(costs, budget, worlds, cap=max_trees)
+    value, witness, actual = certify(
+        costs, budget, worlds, cap=max_generator_events)
     if actual != predicted:
-        raise AssertionError("structural count disagrees with enumerator")
+        raise AssertionError("complete-policy count disagrees with enumerator")
+    if score_witness(witness, costs, budget, worlds) != value:
+        raise AssertionError("independent witness score disagrees")
     return value, witness, actual
 
 
 def score_witness(tree, costs, budget, worlds):
-    """Independent, non-optimizing legality and exact-reward check."""
+    """Non-optimizing legality and exact expected-reward check."""
     n = len(costs)
     def walk(node, remaining, balance):
         if node == STOP:
