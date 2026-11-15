@@ -57,7 +57,7 @@ class Protocol102(unittest.TestCase):
         good = (0, STOP, (1, STOP, STOP))
         corrupted = (0, (1, STOP, STOP), STOP)
         self.assertEqual(score_witness(good, (1, 1), 2, worlds), F(3, 2))
-        self.assertEqual(score_witness(corrupted, (1, 1), 2, worlds), F(1))
+        self.assertEqual(score_witness(corrupted, (1, 1), 2, worlds), F(1, 2))
 
     def test_illegal_repeated_claim_is_rejected(self):
         worlds = independent_worlds((F(1, 2),))
