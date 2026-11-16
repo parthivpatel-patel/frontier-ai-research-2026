@@ -10,7 +10,7 @@ For a fixed truth state t, let n_t be the number of independently sampled, adjud
 
 P(|qhat_t-q_t| >= epsilon) <= 2 exp(-2 n_t epsilon^2).
 
-Thus a two-sided 95% bound with epsilon=0.05 requires n_t >= ceil(log(40)/(2*0.05^2)) = 738 *per truth state*. This is a conservative distribution-free sufficient bound for a single cell, **not** a guarantee under correlated source clusters, nonrandom labeling, distribution shift, or adaptive selection. To cover all eight conditional cells simultaneously by a union bound, the same epsilon at familywise alpha=0.05 requires n_t >= ceil(log(320)/(2*0.05^2)) = 1754 per truth state. These counts are design calculations, not observed dataset sizes or a claim that this sample is attainable at $0.
+Thus a two-sided 95% bound with epsilon=0.05 requires n_t >= ceil(log(40)/(2*0.05^2)) = 738 *per truth state*. This is a conservative distribution-free sufficient bound for a single cell, **not** a guarantee under correlated source clusters, nonrandom labeling, distribution shift, or adaptive selection. To cover all eight conditional cells simultaneously by a union bound, the same epsilon at familywise alpha=0.05 requires n_t >= ceil(log(320)/(2*0.05^2)) = 1154 per truth state. These counts are design calculations, not observed dataset sizes or a claim that this sample is attainable at $0.
 
 For a prior pi and observed ++, the posterior is pi*q_1/[pi*q_1+(1-pi)*q_0]. Even a small absolute error in q_0 can cause a large posterior error if the denominator is small. Do not present plug-in posteriors as calibrated confidence without interval propagation and out-of-sample checking. When the denominator is zero, the observation has zero model probability and the posterior is undefined, not 0 or 1.
 
