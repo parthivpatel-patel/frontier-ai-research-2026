@@ -14,11 +14,13 @@ class CrossOracleCoverageAccounting(unittest.TestCase):
     def test_comparison_case_counts_and_uniqueness(self):
         recorded = []
         suite = CrossOracleTests()
-        def record(costs, budget, worlds):
+        def record(self, costs, budget, worlds):
             # Canonicalize the rational world table; keep zero-mass worlds.
             signature = (tuple(costs), budget, tuple(sorted(worlds.items())))
             recorded.append(signature)
 
+        # patch.object installs a function descriptor on the class; calls bind
+        # the CrossOracleTests instance as the first argument.
         with patch.object(CrossOracleTests, "compare", record):
             suite.test_one_claim_extreme_and_fractional()
             self.assertEqual(len(recorded), 12)
