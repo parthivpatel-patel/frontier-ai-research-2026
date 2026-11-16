@@ -78,7 +78,9 @@ class RobustInformationMonotonicity(unittest.TestCase):
             one = deterministic_minimax(p, models, all_first_only_policies())
             two = deterministic_minimax(p, models, all_joint_policies())
             for fee in (F(0), F(1,20), F(1)):
-                self.assertEqual(min(one, two+fee), min(one, two+fee))
+                self.assertGreaterEqual(two+fee, two)
+                if fee == 0:
+                    self.assertEqual(min(one, two+fee), two)
                 self.assertLessEqual(min(one, two+fee), one)
 
 
