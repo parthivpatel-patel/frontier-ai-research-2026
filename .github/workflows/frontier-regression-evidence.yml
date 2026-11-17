@@ -6,6 +6,7 @@ on:
       - 'research/fixtures/test_protocol_146_identifiability_witness.py'
       - 'research/fixtures/test_protocol_149_source_cluster_certificate.py'
       - 'research/fixtures/test_protocol_150_adversarial_source_selection.py'
+      - 'research/fixtures/inventory_regressions.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -20,6 +21,8 @@ jobs:
           echo "commit=$GITHUB_SHA"
           echo "runner=$RUNNER_OS $RUNNER_ARCH"
           python3 --version
+      - name: Inventory all regression files (not a full-suite pass)
+        run: python3 research/fixtures/inventory_regressions.py
       - name: Run standalone deterministic fixtures
         run: |
           set -eu
