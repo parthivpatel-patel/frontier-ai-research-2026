@@ -48,11 +48,12 @@ def loss(action_id, truth, false_accept=F(1), false_reject=F(1),
 
 
 def risk(policy, coupling, prior=F(1, 2), fee=F(0),
-         false_accept=F(1), false_reject=F(1), abstain=F(1, 4)):
+         false_accept=F(1), false_reject=F(1), abstain=F(1, 4),
+         sensitivity=F(4, 5), specificity=F(4, 5)):
     total = F(0)
     for truth, weight, positive, both in (
-        (1, prior, F(4, 5), coupling[0]),
-        (0, 1 - prior, F(1, 5), coupling[1]),
+        (1, prior, sensitivity, coupling[0]),
+        (0, 1 - prior, 1 - specificity, coupling[1]),
     ):
         for (first, second), probability in zip(
             ((0, 0), (0, 1), (1, 0), (1, 1)), joint(positive, both)
@@ -67,7 +68,9 @@ def risk(policy, coupling, prior=F(1, 2), fee=F(0),
 
 
 def minimax(policies, **kwargs):
-    return min(max(risk(policy, c, **kwargs) for c in corners())
+    feasible = corners(kwargs.get('sensitivity', F(4, 5)),
+                       kwargs.get('specificity', F(4, 5)))
+    return min(max(risk(policy, c, **kwargs) for c in feasible)
                for policy in policies)
 
 
@@ -77,6 +80,22 @@ CONDITIONAL = tuple(p for p in POLICIES if (p[0] >= 3) != (p[1] >= 3))
 
 
 class Protocol129Tests(unittest.TestCase):
+    def test_nondefault_marginals_are_consistent(self):
+        sensitivity, specificity = F(3, 4), F(2, 3)
+        for c in corners(sensitivity, specificity):
+            self.assertEqual(sum(joint(sensitivity, c[0])), 1)
+            self.assertEqual(sum(joint(1-specificity, c[1])), 1)
+            self.assertTrue(all(x >= 0 for x in joint(sensitivity, c[0])))
+            self.assertTrue(all(x >= 0 for x in joint(1-specificity, c[1])))
+            # An always-reject policy incurs loss exactly equal to prior
+            # times false-reject cost, regardless of verifier marginals.
+            self.assertEqual(risk((0, 0), c, prior=F(2, 5),
+                                  sensitivity=sensitivity,
+                                  specificity=specificity), F(2, 5))
+        self.assertEqual(minimax(NEVER, sensitivity=sensitivity,
+                                 specificity=specificity),
+                         minimax(NEVER))
+
     def test_policy_partition(self):
         self.assertEqual((len(POLICIES), len(NEVER), len(ALWAYS),
                           len(CONDITIONAL)), (144, 9, 81, 54))
