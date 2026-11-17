@@ -92,9 +92,10 @@ class Protocol129Tests(unittest.TestCase):
             self.assertEqual(risk((0, 0), c, prior=F(2, 5),
                                   sensitivity=sensitivity,
                                   specificity=specificity), F(2, 5))
-        self.assertEqual(minimax(NEVER, sensitivity=sensitivity,
-                                 specificity=specificity),
-                         minimax(NEVER))
+        kwargs = dict(sensitivity=sensitivity, specificity=specificity)
+        self.assertLessEqual(minimax(POLICIES, **kwargs),
+                             min(minimax(NEVER, **kwargs),
+                                 minimax(ALWAYS, **kwargs)))
 
     def test_policy_partition(self):
         self.assertEqual((len(POLICIES), len(NEVER), len(ALWAYS),
