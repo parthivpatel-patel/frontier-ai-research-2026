@@ -1,0 +1,28 @@
+name: Frontier regression evidence (standard public runner)
+on:
+  push:
+    paths:
+      - '.github/workflows/frontier-regression-evidence.yml'
+      - 'research/fixtures/test_protocol_146_identifiability_witness.py'
+      - 'research/fixtures/test_protocol_149_source_cluster_certificate.py'
+      - 'research/fixtures/test_protocol_150_adversarial_source_selection.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Record execution provenance
+        run: |
+          echo "commit=$GITHUB_SHA"
+          echo "runner=$RUNNER_OS $RUNNER_ARCH"
+          python3 --version
+      - name: Run standalone deterministic fixtures
+        run: |
+          set -eu
+          python3 research/fixtures/test_protocol_146_identifiability_witness.py -v
+          python3 research/fixtures/test_protocol_149_source_cluster_certificate.py -v
+          python3 research/fixtures/test_protocol_150_adversarial_source_selection.py -v
