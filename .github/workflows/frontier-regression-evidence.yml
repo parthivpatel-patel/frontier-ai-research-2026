@@ -8,6 +8,8 @@ on:
       - 'research/fixtures/test_protocol_150_adversarial_source_selection.py'
       - 'research/fixtures/inventory_regressions.py'
       - 'research/fixtures/test_protocol_152_selection_adjusted_certificate.py'
+      - 'research/tools/validate_preregistration.py'
+      - 'research/tests/test_preregistration_validator.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -31,3 +33,5 @@ jobs:
           python3 research/fixtures/test_protocol_149_source_cluster_certificate.py -v
           python3 research/fixtures/test_protocol_150_adversarial_source_selection.py -v
           python3 research/fixtures/test_protocol_152_selection_adjusted_certificate.py -v
+      - name: Adversarial preregistration integrity checks
+        run: python3 -m unittest discover -s research/tests -p 'test_preregistration_validator.py' -v
