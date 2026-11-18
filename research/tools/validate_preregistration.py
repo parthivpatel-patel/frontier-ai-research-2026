@@ -94,7 +94,10 @@ def validate(manifest_path, attestation_path=None, require_attestation=False):
 
 
 def main(argv):
-    strict = len(argv) > 1 and argv[1] == "--require-attestation"\n    if strict:\n        argv = [argv[0]] + argv[2:]\n    if len(argv) not in (2, 3) or (strict and len(argv) != 3):
+    strict = len(argv) > 1 and argv[1] == "--require-attestation"
+    if strict:
+        argv = [argv[0]] + argv[2:]
+    if len(argv) not in (2, 3) or (strict and len(argv) != 3):
         print(__doc__.strip())
         return 2
     try:
