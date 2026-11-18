@@ -2,7 +2,7 @@
 """Validate a preregistration manifest and optional separate SHA-256 attestation.
 
 Standard library only. Does not freeze a study, attest timing, or access outcomes.
-Usage: python research/tools/validate_preregistration.py MANIFEST [ATTESTATION]
+Usage: python research/tools/validate_preregistration.py MANIFEST [ATTESTATION]\n       python research/tools/validate_preregistration.py --require-attestation MANIFEST ATTESTATION
 """
 import hashlib
 import json
@@ -25,7 +25,7 @@ def reject_duplicate_keys(pairs):
     return result
 
 
-def validate(manifest_path, attestation_path=None):
+def validate(manifest_path, attestation_path=None, require_attestation=False):
     errors = []
     raw = pathlib.Path(manifest_path).read_bytes()
     try:
@@ -94,11 +94,11 @@ def validate(manifest_path, attestation_path=None):
 
 
 def main(argv):
-    if len(argv) not in (2, 3):
+    strict = len(argv) > 1 and argv[1] == "--require-attestation"\n    if strict:\n        argv = [argv[0]] + argv[2:]\n    if len(argv) not in (2, 3) or (strict and len(argv) != 3):
         print(__doc__.strip())
         return 2
     try:
-        errors = validate(argv[1], argv[2] if len(argv) == 3 else None)
+        errors = validate(argv[1], argv[2] if len(argv) == 3 else None, require_attestation=strict)
     except (OSError, UnicodeDecodeError, ValueError) as exc:
         print("FAIL:", exc)
         return 1
