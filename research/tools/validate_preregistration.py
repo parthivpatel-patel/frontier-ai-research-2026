@@ -16,11 +16,21 @@ def canonical_bytes(value):
                       ensure_ascii=False, allow_nan=False).encode("utf-8")
 
 
+def reject_duplicate_keys(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("duplicate JSON key: " + key)
+        result[key] = value
+    return result
+
+
 def validate(manifest_path, attestation_path=None):
     errors = []
     raw = pathlib.Path(manifest_path).read_bytes()
     try:
-        obj = json.loads(raw, parse_constant=lambda x: (_ for _ in ()).throw(ValueError(x)))
+        obj = json.loads(raw, object_pairs_hook=reject_duplicate_keys,
+                         parse_constant=lambda x: (_ for _ in ()).throw(ValueError(x)))
     except (ValueError, UnicodeDecodeError) as exc:
         return ["invalid JSON: " + str(exc)]
     if not isinstance(obj, dict):
@@ -65,7 +75,9 @@ def validate(manifest_path, attestation_path=None):
             errors.append(field + " requires unique nonblank string ids")
     if attestation_path is not None:
         try:
-            att = json.loads(pathlib.Path(attestation_path).read_text(encoding="utf-8"))
+            att = json.loads(pathlib.Path(attestation_path).read_text(encoding="utf-8"),
+                             object_pairs_hook=reject_duplicate_keys,
+                             parse_constant=lambda x: (_ for _ in ()).throw(ValueError(x)))
             if not isinstance(att, dict):
                 raise ValueError("attestation must be an object")
             for key in ("manifest_path", "sha256", "git_commit", "freeze_utc",
