@@ -27,6 +27,8 @@ def reject_duplicate_keys(pairs):
 
 def validate(manifest_path, attestation_path=None, require_attestation=False):
     errors = []
+    if require_attestation and attestation_path is None:
+        errors.append("strict freeze validation requires a separate attestation")
     raw = pathlib.Path(manifest_path).read_bytes()
     try:
         obj = json.loads(raw, object_pairs_hook=reject_duplicate_keys,
