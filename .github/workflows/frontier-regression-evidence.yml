@@ -7,6 +7,7 @@ on:
       - 'research/fixtures/test_protocol_149_source_cluster_certificate.py'
       - 'research/fixtures/test_protocol_150_adversarial_source_selection.py'
       - 'research/fixtures/inventory_regressions.py'
+      - 'research/fixtures/test_protocol_152_selection_adjusted_certificate.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,3 +30,4 @@ jobs:
           python3 research/fixtures/test_protocol_146_identifiability_witness.py -v
           python3 research/fixtures/test_protocol_149_source_cluster_certificate.py -v
           python3 research/fixtures/test_protocol_150_adversarial_source_selection.py -v
+          python3 research/fixtures/test_protocol_152_selection_adjusted_certificate.py -v
