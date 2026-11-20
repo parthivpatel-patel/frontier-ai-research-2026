@@ -4,6 +4,7 @@ Run on an eligible free cloud CI runner: python -m unittest tests.test_paired_co
 No model inference, data download, or empirical result is produced.
 """
 import unittest
+import math
 from collections import defaultdict
 
 POLICIES = frozenset(("C", "T", "S", "B"))
@@ -45,14 +46,14 @@ def validate(rows):
             errors.append((j, "temporal look-ahead"))
         for k in ("cost_usd", "input_tokens", "output_tokens", "verifier_calls"):
             v = r[k]
-            if type(v) not in (int, float) or v < 0 or (k == "cost_usd" and v != 0):
+            if (type(v) not in (int, float) or not math.isfinite(v) or v < 0 or (k != "cost_usd" and type(v) is not int) or (k == "cost_usd" and v != 0)):
                 errors.append((j, "invalid budget: " + k))
         families[r["problem_family_id"]].add(r["split"])
         sources[r["source_id"]].add(r["split"])
         answers[r["candidate_answer_hash"]].add(r["split"])
         previous = by_item[r["item_id"]]
         if previous:
-            for k in ("domain", "split", "candidate_answer_hash", "correctness", "problem_family_id"):
+            for k in ("domain", "split", "candidate_answer_hash", "correctness", "problem_family_id", "source_id"):
                 if r[k] != previous[k]:
                     errors.append((j, "inconsistent shared item: " + k))
         else:
@@ -83,6 +84,9 @@ def paired_selective_error_difference(rows, first="T", second="C"):
         raise ValueError("coverage unmatched or zero")
     ea = sum(r["accept"] and r["correctness"] == "incorrect" for r in a.values())
     eb = sum(r["accept"] and r["correctness"] == "incorrect" for r in b.values())
+    budget_keys = ("input_tokens", "output_tokens", "verifier_calls", "cost_usd")
+    if any(any(a[item][k] != b[item][k] for k in budget_keys) for item in a):
+        raise ValueError("computational budgets unmatched")
     return (ea - eb) / ka
 
 
@@ -139,6 +143,23 @@ class ContractTests(unittest.TestCase):
         messages = [msg for _, msg in validate(rows)]
         self.assertTrue(any("duplicate" in m for m in messages))
         self.assertTrue(any("inconsistent" in m for m in messages))
+
+    def test_reject_nonfinite_and_fractional_budgets(self):
+        for key, value in (("input_tokens", float("nan")), ("output_tokens", float("inf")), ("verifier_calls", 1.5), ("cost_usd", float("nan"))):
+            r = fixture("a", "T", True)
+            r[key] = value
+            self.assertTrue(any("invalid budget" in msg for _, msg in validate([r])), key)
+
+    def test_reject_shared_item_source_conflict(self):
+        a, b = fixture("a", "T", True), fixture("a", "C", True)
+        b["source_id"] = "different_source"
+        self.assertTrue(any("inconsistent shared item: source_id" in msg for _, msg in validate([a, b])))
+
+    def test_reject_matched_coverage_unmatched_compute(self):
+        a, b = fixture("a", "T", True), fixture("a", "C", True)
+        b["verifier_calls"] = 2
+        with self.assertRaisesRegex(ValueError, "budgets unmatched"):
+            paired_selective_error_difference([a, b])
 
 
 if __name__ == "__main__":
