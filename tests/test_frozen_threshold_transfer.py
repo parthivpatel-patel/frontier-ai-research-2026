@@ -45,6 +45,11 @@ def frozen_decisions(heldout_rows, cutoff, tie_policy="reject"):
         raise ValueError("invalid frozen cutoff or tie policy")
     if any(r.get("split") != "heldout" or not _finite_score(r.get("score")) for r in heldout_rows):
         raise ValueError("held-out scores required")
+    ids = [r.get("item_id") for r in heldout_rows]
+    if any(not isinstance(item, str) or not item for item in ids):
+        raise ValueError("missing or invalid held-out item ID")
+    if len(set(ids)) != len(ids):
+        raise ValueError("duplicate held-out item IDs")
     return {r["item_id"]: r["score"] > cutoff or
             (tie_policy == "accept" and r["score"] == cutoff)
             for r in heldout_rows}
@@ -68,6 +73,8 @@ def descriptive_domain_metrics(rows, decisions):
         groups[r["domain"]].append(r)
     if set(decisions) != seen:
         raise ValueError("extra held-out decisions")
+    if any(type(value) is not bool for value in decisions.values()):
+        raise ValueError("held-out decisions must be boolean")
     result = {}
     for domain, group in groups.items():
         accepted = [r for r in group if decisions[r["item_id"]]]
@@ -133,6 +140,22 @@ class FrozenTransferTests(unittest.TestCase):
         base = dict(problem_family_id="f", source_id="s", candidate_answer_hash="h")
         with self.assertRaisesRegex(ValueError, "leakage"):
             assert_family_disjoint([base], [dict(base, source_id="s2")])
+
+    def test_reject_duplicate_heldout_ids_before_dict_overwrite(self):
+        rows = [dict(item_id="same", split="heldout", score=0.7),
+                dict(item_id="same", split="heldout", score=0.1)]
+        with self.assertRaisesRegex(ValueError, "duplicate held-out"):
+            frozen_decisions(rows, 0.5)
+
+    def test_reject_missing_heldout_item_id(self):
+        with self.assertRaisesRegex(ValueError, "invalid held-out item ID"):
+            frozen_decisions([dict(split="heldout", score=0.7)], 0.5)
+
+    def test_reject_nonboolean_decision_values(self):
+        rows = [dict(item_id="a", split="heldout", domain="physics",
+                     correctness="correct", problem_family_id="f")]
+        with self.assertRaisesRegex(ValueError, "must be boolean"):
+            descriptive_domain_metrics(rows, {"a": 1})
 
     def test_metrics_are_descriptive_only(self):
         rows = [dict(item_id="a", split="heldout", domain="mathematics",
