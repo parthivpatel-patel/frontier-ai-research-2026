@@ -19,11 +19,13 @@ def freeze_threshold(calibration_rows, policy, target_coverage=0.5):
     coverage but is not a deployable rule for unseen tied item IDs. For
     confirmatory deployment, use the conservative strict threshold instead.
     """
-    if not 0 < target_coverage <= 1:
-        raise ValueError("target coverage must lie in (0,1]")
+    if type(target_coverage) not in (int, float) or not math.isfinite(target_coverage) or not 0 < target_coverage <= 1:
+        raise ValueError("target coverage must be finite and lie in (0,1]")
     rows = [r for r in calibration_rows if r.get("policy_id") == policy]
     if not rows or any(r.get("split") != "calibration" for r in rows):
         raise ValueError("missing or non-calibration scores")
+    if any(not isinstance(r.get("item_id"), str) or not r["item_id"] for r in rows):
+        raise ValueError("missing or invalid calibration item ID")
     if len({r.get("item_id") for r in rows}) != len(rows):
         raise ValueError("duplicate calibration items")
     if any(not _finite_score(r.get("score")) for r in rows):
@@ -101,6 +103,16 @@ def assert_family_disjoint(calibration_rows, heldout_rows):
 
 
 class FrozenTransferTests(unittest.TestCase):
+    def test_reject_nonfinite_and_boolean_coverage(self):
+        for value in (float("nan"), float("inf"), True, 0, -0.1, 1.1):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "target coverage"):
+                freeze_threshold([dict(item_id="a", policy_id="T", split="calibration", score=0.9)], "T", value)
+
+    def test_reject_missing_or_invalid_calibration_ids(self):
+        for item in (None, "", 17):
+            with self.subTest(item=item), self.assertRaisesRegex(ValueError, "calibration item ID"):
+                freeze_threshold([dict(item_id=item, policy_id="T", split="calibration", score=0.9)], "T")
+
     def test_calibration_only_threshold(self):
         cal = [dict(item_id=str(i), policy_id="T", split="calibration", score=i)
                for i in range(4)]
