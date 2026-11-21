@@ -16,6 +16,8 @@ def paired_disagreement(rows, a="temporal", b="baseline"):
     """
     if not rows:
         raise ValueError("empty paired evaluation")
+    if not isinstance(a, str) or not isinstance(b, str) or not a or not b or a == b:
+        raise ValueError("two distinct verifier decision columns required")
     seen = set()
     n_a = n_b = 0
     only_a_errors = only_b_errors = 0
@@ -63,10 +65,8 @@ def family_leave_one_out(rows, a="temporal", b="baseline"):
     Dropping a family may break equal coverage; such subsets are reported as
     non-comparable, rather than silently recalibrating thresholds on held-out.
     """
-    families = sorted({r.get("problem_family_id") for r in rows})
-    if not families or any(not isinstance(f, str) or not f for f in families):
-        raise ValueError("valid source-family identifiers required")
     paired_disagreement(rows, a, b)
+    families = sorted({r["problem_family_id"] for r in rows})
     out = {}
     for family in families:
         subset = [r for r in rows if r["problem_family_id"] != family]
@@ -117,6 +117,16 @@ class PairedDisagreementTests(unittest.TestCase):
     def test_reject_integer_decision(self):
         with self.assertRaisesRegex(ValueError, "boolean"):
             paired_disagreement([self.row("1", "f1", "correct", 1, True)])
+
+    def test_reject_same_verifier_column(self):
+        with self.assertRaisesRegex(ValueError, "distinct verifier"):
+            paired_disagreement([self.row("1", "f1", "correct", True, False)], a="temporal", b="temporal")
+
+    def test_reject_mixed_family_types_with_value_error(self):
+        rows = [self.row("1", "f1", "correct", True, True),
+                self.row("2", 3, "correct", True, True)]
+        with self.assertRaisesRegex(ValueError, "problem_family_id"):
+            family_leave_one_out(rows)
 
     def test_leave_one_family_out_unequal_coverage(self):
         rows = [self.row("1", "f1", "incorrect", True, False),
