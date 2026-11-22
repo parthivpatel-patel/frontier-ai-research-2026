@@ -7,9 +7,11 @@ on:
       - "research/archival_bounds.py"
       - "research/paired_archival_oracle.py"
       - "research/paired_archival_linear.py"
+      - "research/paired_archival_parity.py"
       - "research/test_archival_bounds.py"
       - "research/test_paired_archival_oracle.py"
       - "research/test_paired_archival_linear.py"
+      - "research/test_paired_archival_parity.py"
       - "research/test_paired_archival_linear_metamorphic.py"
       - "research/test_paired_archival_metamorphic.py"
       - ".github/workflows/archival-identification.yml"
@@ -37,4 +39,5 @@ jobs:
             research/test_paired_archival_oracle.py \
             research/test_paired_archival_metamorphic.py \
             research/test_paired_archival_linear.py \
-            research/test_paired_archival_linear_metamorphic.py
+            research/test_paired_archival_linear_metamorphic.py \
+            research/test_paired_archival_parity.py
