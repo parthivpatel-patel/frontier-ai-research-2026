@@ -1,0 +1,35 @@
+name: Archival identification reference checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/archival_bounds.py"
+      - "research/paired_archival_oracle.py"
+      - "research/test_archival_bounds.py"
+      - "research/test_paired_archival_oracle.py"
+      - "research/test_paired_archival_metamorphic.py"
+      - ".github/workflows/archival-identification.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: archival-identification-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  exact-small-frame:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fixed test dependency
+        run: python3 -m pip install pytest==8.3.5
+      - name: Execute archival exact-arithmetic and metamorphic tests
+        run: |
+          python3 -m pytest -q \
+            research/test_archival_bounds.py \
+            research/test_paired_archival_oracle.py \
+            research/test_paired_archival_metamorphic.py
