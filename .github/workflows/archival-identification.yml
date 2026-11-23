@@ -18,6 +18,8 @@ on:
       - "research/test_paired_archival_parity_metamorphic.py"
       - "research/test_paired_archival_violation_oracle.py"
       - "research/test_paired_archival_source_cluster_oracle.py"
+      - "research/test_source_deletion_independent.py"
+      - "research/test_source_deletion_metamorphic.py"
       - "research/test_paired_archival_linear_metamorphic.py"
       - "research/test_paired_archival_metamorphic.py"
       - ".github/workflows/archival-identification.yml"
@@ -50,4 +52,6 @@ jobs:
             research/test_paired_archival_parity_independent_oracle.py \
             research/test_paired_archival_parity_metamorphic.py \
             research/test_paired_archival_violation_oracle.py \
-            research/test_paired_archival_source_cluster_oracle.py
+            research/test_paired_archival_source_cluster_oracle.py \
+            research/test_source_deletion_independent.py \
+            research/test_source_deletion_metamorphic.py
