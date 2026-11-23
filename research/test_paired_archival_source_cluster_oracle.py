@@ -78,3 +78,44 @@ def test_invalid_budget(budget):
     a, b, m = fixture()
     with pytest.raises(ValueError):
         source_cluster_bounds(a, b, m, ((0, 1, 0, "a"),), budget)
+
+
+def test_partition_coarsening_feasible_counts_and_endpoints():
+    """Exhaustively verify partition monotonicity for three distinct records."""
+    from itertools import product
+
+    a, b, m = fixture()
+    base = ((0, 1, 0), (1, 2, 0), (0, 2, 1))
+    # Every possible assignment of three source IDs; canonical relabeling is
+    # unnecessary for this small independent reference check.
+    for ids in product(range(3), repeat=3):
+        refined = tuple((*edge, source) for edge, source in zip(base, ids))
+        coarsened = tuple((*edge, 0) for edge in base)
+        for k in range(min(len(set(ids)), 1) + 1):
+            narrow = source_cluster_bounds(a, b, m, refined, k)
+            wide = source_cluster_bounds(a, b, m, coarsened, k)
+            assert narrow["feasible_assignments"] <= wide["feasible_assignments"]
+            if narrow["sharp"] is not None:
+                assert wide["sharp"] is not None
+                assert wide["sharp"][0] <= narrow["sharp"][0]
+                assert narrow["sharp"][1] <= wide["sharp"][1]
+
+
+def test_partition_strict_witness_and_zero_budget_invariance():
+    a, b, m = fixture()
+    split = ((0, 1, 0, "A"), (1, 2, 0, "B"))
+    merged = ((0, 1, 0, "C"), (1, 2, 0, "C"))
+    assert source_cluster_bounds(a, b, m, split, 1)["feasible_assignments"] < 8
+    assert source_cluster_bounds(a, b, m, merged, 1)["feasible_assignments"] == 8
+    assert source_cluster_bounds(a, b, m, split, 0) == source_cluster_bounds(a, b, m, merged, 0)
+
+
+def test_full_source_relaxation_preserves_hard_labels():
+    a, b, m = fixture()
+    edges = ((0, 1, 0, "A"), (1, 2, 1, "B"))
+    observed = ((0, 1),)
+    unrestricted = source_cluster_bounds(a, b, m, observed=observed)
+    relaxed = source_cluster_bounds(a, b, m, edges, 2, observed)
+    assert relaxed == unrestricted
+    assert relaxed["feasible_assignments"] == 4
+    assert source_cluster_bounds(a, b, m, edges, 2, ((0, 0), (0, 1)))["feasible_assignments"] == 0
